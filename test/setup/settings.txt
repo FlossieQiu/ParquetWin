@@ -1,0 +1,2 @@
+DATA_DIR = "D:/plugins/DolphinDBPlugin/parquetWin/test/setup/data/"
+WORK_DIR = "D:/tmp/parquet/"
