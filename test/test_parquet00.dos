@@ -1,0 +1,3654 @@
+#include "setup/settings.txt"
+login("admin","123456")
+try{
+loadPlugin(getHomeDir()+"/plugins/parquetWin/PluginParquetWin.txt")
+}catch(ex){print ex}
+
+
+@testing:case="test_parquet_extractParquetSchema_file_not_exist", exception=1
+ParquetWin::extractParquetSchema(DATA_DIR+"/not_exist")
+
+@testing:case="test_parquet_extractParquetSchema_file_no_arg", exception=1
+re = ParquetWin::extractParquetSchema()
+
+@testing:case="test_parquet_extractParquetSchema_file_string_null", exception=1
+ParquetWin::extractParquetSchema(string())
+
+@testing:case="test_parquet_extractParquetSchema_file_over_arg", syntaxError=1
+re = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet", 1)
+
+@testing:case="test_parquet_extractParquetSchema_file_vector", exception=1
+re = ParquetWin::extractParquetSchema(["a", "b"])
+
+@testing:case="test_parquet_extractParquetSchema_file_pair", exception=1
+re = ParquetWin::extractParquetSchema(1:2)
+
+@testing:case="test_parquet_extractParquetSchema_file_string_null", exception=1
+re = ParquetWin::extractParquetSchema(string(NULL))
+
+@testing:case="test_parquet_extractParquetSchema_file_matrix", exception=1
+re = ParquetWin::extractParquetSchema(1..6$2:3)
+
+@testing:case="test_parquet_extractParquetSchema_file_dict", exception=1
+re = ParquetWin::extractParquetSchema(dict([`1],  3))
+
+@testing:case="test_parquet_extractParquetSchema_file_set", exception=1
+re = ParquetWin::extractParquetSchema(set(2 3 5))
+
+@testing:case="test_parquet_extractParquetSchema_file_table", exception=1
+re = ParquetWin::extractParquetSchema(table(`1 `2 `3 as x))
+
+// @testing:case="test_parquet_extractParquetSchema_logical_type_invalid", exception=1
+// //line 271 ??
+// scm = ParquetWin::extractParquetSchema(DATA_DIR +"/empty.parquet")
+// res=ParquetWin::loadParquet(DATA_DIR +"/empty.parquet")
+// res.schema()
+
+@testing:case="test_parquet_extractParquetSchema_logical_type_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR +"/uuid-arrow.parquet") //line 361 ??
+
+@testing:case="test_parquet_extractParquetSchema_logical_type_JSON", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR +"/parquet_with_json.parquet")
+/*
+@testing:case="test_parquet_extractParquetSchema_gt_max_repetition_level_scm"
+scm = ParquetWin::extractParquetSchema(DATA_DIR + "/NestedMap.parquet") 
+assert 1, scm[`name]==`map_of_maps.key_value.key`map_of_maps.key_value.value.key_value.key`map_of_maps.key_value.value.key_value.value
+assert 2, scm[`type]==["STRING[]", "STRING[]", "INT[]"]
+
+@testing:case="test_parquet_extractParquetSchema_gt_max_repetition_level_load_ex", exception=1
+re = ParquetWin::loadParquet(DATA_DIR + "/NestedMap.parquet") 
+ */
+
+@testing:case="test_parquet_loadParquet_file_vector", exception=1
+re = ParquetWin::loadParquet([DATA_DIR+"/spark.parquet", DATA_DIR+"/spark.parquet"])
+
+@testing:case="test_parquet_loadParquet_file_pair", exception=1
+re = ParquetWin::loadParquet(1:2)
+
+@testing:case="test_parquet_loadParquet_no_arg", exception=1
+ParquetWin::loadParquet()
+
+@testing:case="test_parquet_loadParquet_file_not_exist", exception=1
+ParquetWin::loadParquet(DATA_DIR+"/not_exist")
+
+@testing:case="test_parquet_loadParquet_schema_not_table",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", 1)
+
+@testing:case="test_parquet_loadParquet_column_scalar",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , 1)
+
+@testing:case="test_parquet_loadParquet_column_scalar_gt_maximum",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , 0..7) 
+
+@testing:case="test_parquet_loadParquet_column_string_vector",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , `open`close)
+
+@testing:case="test_parquet_loadParquet_column_include_negative",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , [-1, -2])
+
+@testing:case="test_parquet_loadParquet_column_double",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , [1.5, 2.5])
+
+@testing:case="test_parquet_loadParquet_rowGroupStart_negative",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , , -1)
+
+@testing:case="test_parquet_loadParquet_rowGroupStart_not_scalar",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , , [1,2]) 
+
+@testing:case="test_parquet_loadParquet_rowGroupStart_double",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 135.2)
+
+@testing:case="test_parquet_loadParquet_rowGroupStart_out_of_range",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 137)
+
+@testing:case="test_parquet_loadParquet_rowGroupNum_not_scalar",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , , [1,2]) 
+
+@testing:case="test_parquet_loadParquet_rowGroupNum_negative",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 135, -2)
+
+@testing:case="test_parquet_loadParquet_rowGroupNum_zero",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 135, 0)
+
+@testing:case="test_parquet_loadParquet_rowGroupNum_double",exception=1
+ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 135, 0.5)
+
+@testing:case="test_parquet_loadParquetEx_no_arg",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+ParquetWin::loadParquetEx()
+
+@testing:case="test_parquet_loadParquetEx_dbHandle_null",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(NULL, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_dbHandle_int",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(1, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_dbHandle_vector",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx([1,2], "pt", "成交时间", DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_tableName_null",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db,  , "成交时间", DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_tableName_vector",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db,  [`a, `b], "成交时间", DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_partitionColumns_not_String",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt, 1, DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_partitionColumns_NULL",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt, string(), DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_partitionColumns_not_exists",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt,  `aaa, DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_partitionColumns_vector_simple_partition",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt, ["成交时间", `open], DATA_DIR+"/spark.parquet")
+
+
+@testing:case="test_parquet_loadParquetEx_fileName_NULL",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt, "成交时间", string(NULL))
+
+@testing:case="test_parquet_loadParquetEx_fileName_int",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt, "成交时间", 1)
+
+@testing:case="test_parquet_loadParquetEx_fileName_vector",exception=1
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, `pt, "成交时间", [`a, `b])
+
+@testing:case="test_parquet_loadParquetEx_schema_empty",exception=1
+scm = table(100:0, `name`type, [STRING, STRING])
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", scm)
+
+@testing:case="test_parquet_loadParquetEx_schema_not_match",exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+insert into scm values(`aaa, DOUBLE)
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", scm)
+
+@testing:case="test_parquet_loadParquetEx_schema_int", exception=1
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", 1)
+
+@testing:case="test_parquet_loadParquetEx_schema_vector", exception=1
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", [1,2])
+
+@testing:case="test_parquet_loadParquetEx_column_string", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,`a)
+
+@testing:case="test_parquet_loadParquetEx_column_int", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,6)
+
+
+@testing:case="test_parquet_loadParquetEx_column_with_schema", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet",scm ,[5,6])
+
+@testing:case="test_parquet_loadParquetEx_column_with_schema_ex_2", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+scm2 = scm[3:6]
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet",scm2 ,[3,4,5])
+
+
+@testing:case="test_parquet_loadParquetEx_column_string_vector", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,[`a,`b,`c])
+
+@testing:case="test_parquet_loadParquetEx_column_duplicate_column", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,[6,6,6])
+
+@testing:case="test_parquet_loadParquetEx_column_not_contain_partitionColumns", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,[5,2,3])
+
+@testing:case="test_parquet_loadParquetEx_column_not_exist", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,[5,2,8])
+
+@testing:case="test_parquet_loadParquetEx_column_negative", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", ,[-1,2])
+
+@testing:case="test_parquet_loadParquetEx_rowGroupStar_string", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , `a)
+
+@testing:case="test_parquet_loadParquetEx_rowGroupStar_vector", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , [0,0])
+
+@testing:case="test_parquet_loadParquetEx_rowGroupStar_negative_num", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , -1)
+
+@testing:case="test_parquet_loadParquetEx_rowGroupStar_float", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , 0.1)
+
+@testing:case="test_parquet_loadParquetEx_rowGroupStar_out_of_range", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , 1)
+
+@testing:case="test_parquet_loadParquetEx_rowGroupNum_string", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , 0,`a)
+
+@testing:case="test_parquet_loadParquetEx_rowGroupNum_vector", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , 0,[1,1])
+
+@testing:case="test_parquet_loadParquetEx_rowGroupNum_negative_num", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , ,-1)
+
+@testing:case="test_parquet_loadParquetEx_rowGroupNum_0", exception=1
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , ,0)
+
+@testing:case="test_parquet_loadParquetEx_transfrom_int", exception=1
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , , , 1)
+
+@testing:case="test_parquet_loadParquetEx_transfrom_vector", exception=1
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , , , [1,2])
+
+
+@testing:case="test_parquet_loadParquetEx_transfrom_error_func", exception=1
+def f1(mutable t){
+	return t.replaceColumn!(`amount, t[`amount]/`0)
+}
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , , , f1)
+
+
+
+//@testing:case="test_parquet_loadParquetEx_transfrom_sum"
+//db=database("", RANGE, date(2019.01M..2020.01M))
+//pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , , , sum)
+//Usage: createPartitionedTable(dbHandle, table, tableName, partitionColumns, [compressMethods], [sortColumns|primaryKey], [keepDuplicates=ALL], [sortKeyMappingFunction], [softDelete=false], [indexes], [latestKeyCache=true], [encryptMode='plaintext']). The data type of partitioning column [成交时间] doesn't match the partition scheme in dbHandle.
+@testing:case="test_parquet_loadParquetEx_transfrom_change_fields"
+def f1(mutable t){
+	return select volume,amount,成交时间 from t
+}
+db=database("", VALUE, 2019.01.01..2020.01.01)
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , , , f1)
+pt2=ParquetWin::loadParquet( DATA_DIR+"/spark.parquet")
+pt3=f1(pt2)
+assert 1,pt.count() > 0
+assert 2,pt.count() == pt3.count()
+
+
+@testing:case="test_parquet_parquetDS_empty_arg", exception=1
+ds = ParquetWin::parquetDS()
+
+@testing:case="test_parquet_parquetDS_over_arg", syntaxError=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+ds = ParquetWin::parquetDS(DATA_DIR+"/spark.parquet", scm,1)
+
+@testing:case="test_parquet_parquetDS_filename_int", exception=1
+ds = ParquetWin::parquetDS(1)
+
+@testing:case="test_parquet_parquetDS_filename_NULL", exception=1
+ds = ParquetWin::parquetDS(NULL)
+
+@testing:case="test_parquet_parquetDS_filename_vector", exception=1
+ds=ParquetWin::parquetDS([DATA_DIR+"/spark.parquet", DATA_DIR+"/spark.parquet"])
+
+@testing:case="test_parquet_parquetDS_schema_int", exception=1
+ds=ParquetWin::parquetDS(DATA_DIR+"/spark.parquet", 1)
+
+@testing:case="test_parquet_parquetDS_schema_vector", exception=1
+ds=ParquetWin::parquetDS(DATA_DIR+"/spark.parquet", [1,2])
+
+
+@testing:case="test_parquet_parquetDS_error_schema", exception=1 
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+update scm set type =`KK where type=`LONG
+ds=ParquetWin::parquetDS(DATA_DIR+"/spark.parquet", scm)
+select * from ds[0]
+/*
+@testing:case="test_parquet_parquetDS_gt_max_repetition_level", exception=1
+ds=ParquetWin::parquetDS(DATA_DIR + "/NestedMap.parquet")
+re = mr(ds, x->x)[0][0]
+ */
+@testing:case="test_parquet_saveParquet_args_empty", exception=1 
+ParquetWin::saveParquet()
+
+@testing:case="test_parquet_saveParquet_args_over", syntaxError=1 
+ParquetWin::saveParquet(table(1..10 as x), WORK_DIR+"/aa.parquet",,1)
+
+@testing:case="test_parquet_saveParquet_table_NULL", exception=1 
+ParquetWin::saveParquet(,WORK_DIR+"/aa.parquet") // line 179??
+
+@testing:case="test_parquet_saveParquet_table_int", exception=1 
+ParquetWin::saveParquet(1, WORK_DIR+"/aa.parquet")
+
+@testing:case="test_parquet_saveParquet_table_vector", exception=1 
+ParquetWin::saveParquet([1,2], WORK_DIR+"/aa.parquet")
+
+@testing:case="test_parquet_saveParquet_filename_NULL", exception=1 
+ParquetWin::saveParquet(table(1..10 as x), NULL) 
+
+@testing:case="test_parquet_saveParquet_filename_int", exception=1 
+ParquetWin::saveParquet(table(1..10 as x), 1)
+
+@testing:case="test_parquet_saveParquet_filename_vector", exception=1 
+ParquetWin::saveParquet(table(1..10 as x), [WORK_DIR+"/aa.parquet", WORK_DIR+"/aa.parquet"])
+
+@testing:case="test_parquet_saveParquet_compression_nothing", exception=1 
+ParquetWin::saveParquet(table(1..10 as x), WORK_DIR+"/aa.parquet",NULL)// line 184 ??
+
+@testing:case="test_parquet_saveParquet_compression_not_support", exception=1 
+ParquetWin::saveParquet(table(1..10 as x), WORK_DIR+"/aa.parquet","snappy1") 
+
+@testing:case="test_parquet_saveParquet_compression_emptyString", exception=1 
+ParquetWin::saveParquet(table(1..10 as x), WORK_DIR+"/aa.parquet", "")
+
+@testing:case="test_parquet_extractParquetSchema"
+re = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+assert 1, re[`name]==`open`high`low`close`amount`volume`成交时间
+assert 2, re[`type]==`DOUBLE`DOUBLE`DOUBLE`DOUBLE`DOUBLE`LONG`TIMESTAMP
+
+re=ParquetWin::extractParquetSchema(DATA_DIR+"/machine.parquet/machine.parquet/part-00199-35e8f243-c1a8-4e65-9420-4628f812bd54-c000.snappy.parquet")
+assert 3, re[`name]==["candle_end_time", "code", "open", "high", "low", "close", "volume", "total_volume_2T", "total_volume_1D", "stock_volume_1D"]
+assert 4, re[`type]==`NANOTIMESTAMP`STRING`DOUBLE`DOUBLE`DOUBLE`DOUBLE`LONG`LONG`LONG`LONG
+
+@testing:case="test_parquet_loadParquet"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+/*这里返回的scm中成交时间的type是TIMESTAMP */
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet")
+/*通过schema(re) 发现成交时间的type NANOTIMESTAMP*/
+assert 1, re.size()==687480
+nscm = table(["成交时间", "open", "high", "low", "close", "amount", "volume"] as name, ["TIMESTAMP", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "DOUBLE", "LONG"] as type)
+expected = loadText(DATA_DIR+"/spark.csv", , nscm)
+expected.reorderColumns!(["open", "high", "low", "close", "amount", "volume", "成交时间"])
+assert 2,  each(eqObj, re.values(), expected.values(), 2)
+
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+update scm set type="DOUBLE" where name=`volume
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", scm)
+assert 3, (exec typeString from schema(re).colDefs where name="volume")==`DOUBLE
+expected1 = select open, high, low, close, amount, double(volume), 成交时间 from expected
+assert 4,  each(eqObj, re.values(), expected1.values(), 2)
+
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , [1,2,3])
+assert 5, re.colNames()==`high`low`close
+expected2 = select high, low, close from expected
+assert 6, each(eqObj, re.values(), expected2.values(), 2)
+
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", , [2,3,0])
+assert 7, re.colNames()==`low`close`open
+expected3 = select low, close, open from expected
+assert 8, each(eqObj, re.values(), expected3.values(), 2)
+
+@testing:case="test_parquet_loadParquetEx"
+db=database("", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+assert 1, (exec count(*) from pt)==687480
+
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+assert 2, (exec count(*) from pt)==687480
+
+//schema
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+update scm set type="DOUBLE" where name=`volume
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", scm)
+assert 3, (exec count(*) from pt)==687480
+
+//column
+db=database("", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , [6, 5, 4, 3])
+assert 4, (exec count(*) from pt)==687480
+assert 5, schema(pt).colDefs[`name]==["成交时间", "volume", "amount", "close"]
+
+//transform
+db=database("", RANGE, date(2019.01M..2020.01M))
+t=table(1:0, `open`high`low`close`amount`volume`成交时间, [DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, LONG, TIMESTAMP])
+pt = db.createPartitionedTable(t, "pt", "成交时间")
+
+def f1(mutable t){
+	return t.replaceColumn!(`amount, t[`amount]/10)
+}
+
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet", , , , , f1)
+re=select * from ParquetWin::loadParquet(DATA_DIR+"/spark.parquet") order by 成交时间
+assert 6, eqObj((exec amount from pt), (exec amount from re)/10, 6)
+
+//load into exist table
+db=database("", RANGE, date(2019.01M..2020.01M))
+t=table(1:0, `open`high`low`close`amount`volume`成交时间, [DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, LONG, TIMESTAMP])
+pt = db.createPartitionedTable(t, "pt", "成交时间")
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+assert 7, (exec count(*) from pt)==687480
+
+//dfs
+login("admin", "123456")
+try{
+	dropDatabase("dfs://test_parquet")
+}catch(ex){print ex}
+db=database("dfs://test_parquet", VALUE, 2019.01.01..2019.12.31)
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+assert 8, (exec count(*) from pt)==687480
+
+try{
+	dropDatabase("dfs://test_parquet")
+}catch(ex){print ex}
+db=database("dfs://test_parquet", RANGE, date(2019.01M..2020.01M))
+pt=ParquetWin::loadParquetEx(db, "pt", "成交时间", DATA_DIR+"/spark.parquet")
+assert 9, (exec count(*) from pt)==687480
+
+@testing:case="test_parquet_loadParquetEx_one_group_not_match_SEQ", exception=1
+db=database("", SEQ, 4)
+pt=ParquetWin::loadParquetEx(db, "pt", , DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_one_group_not_support_SEQ", exception=1
+db=database("", SEQ, 1)
+pt=ParquetWin::loadParquetEx(db, "pt", , DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquetEx_SEQ", exception=1
+db = database("", SEQ, 136)
+pt = ParquetWin::loadParquetEx(db, "pt", "registration_dttm", DATA_DIR+"/level.parquet")
+
+@testing:case="test_parquet_parquetDS"
+ds = ParquetWin::parquetDS(DATA_DIR+"/spark.parquet")
+re = mr(ds, x->x)[0][0]
+assert 1, re.size()==687480
+
+ds=ParquetWin::parquetDS(DATA_DIR+"/spark.parquet", NULL) 
+re = mr(ds, x->x)[0][0]
+assert 2, re.size()==687480
+
+@testing:case="test_parquet_more_datasets"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/userdata1.parquet")
+re = ParquetWin::loadParquet(DATA_DIR+"/userdata1.parquet")
+assert 1, re.size()==1000
+nscm = table(`col0 as name, `INT as type)
+nscm.append!(scm)
+update nscm set type="DATETIME" where name="registration_dttm"
+expected = loadText(DATA_DIR+"/userdata1.csv", , nscm)
+expected.drop!(`col0)
+expected.replaceColumn!("registration_dttm", nanotimestamp(expected["registration_dttm"]))
+assert 2, each(eqObj, re.values(), expected.values())
+
+login("admin", "123456")
+try{
+	dropDatabase("dfs://test_parquet")
+}catch(ex){print ex}
+db=database("dfs://test_parquet", VALUE, [2016.02.03])
+pt = ParquetWin::loadParquetEx(db, "pt", "registration_dttm", DATA_DIR+"/userdata1.parquet")
+assert 2, (exec count(*) from pt)==1000
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/level.parquet")
+ds = ParquetWin::parquetDS(DATA_DIR+"/level.parquet")
+assert 3, ds.size()==136
+re = ParquetWin::loadParquet(DATA_DIR+"/level.parquet")
+assert 4, re.size()==6755159
+nscm = table(`col as name, `INT as type)
+nscm.append!(scm)
+expected = loadText(DATA_DIR+"/level.csv", , nscm)
+expected.drop!(`col)
+assert 5, each(eqObj, re.values(), expected.values(), 2)
+
+re = ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 1)
+assert 6, re.size()==6705159
+
+re = ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 3, 5)
+assert 7, re.size()==250000
+
+re = ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 135, 136)
+assert 8, re.size()==5159
+
+re = ParquetWin::loadParquet(DATA_DIR+"/level.parquet", , , 135, 100)
+assert 10, re.size()==5159
+
+try{
+	dropDatabase("dfs://test_parquet")
+}catch(ex){print ex}
+db=database("dfs://test_parquet", HASH, [SYMBOL, 30])
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/level.parquet")
+update scm set type = `SYMBOL where name="symbol"
+t = table(1:0, scm[`name], scm[`type])
+pt = db.createPartitionedTable(t, `pt, `symbol)
+
+def f1(mutable t){
+	return t.replaceColumn!(`symbol, symbol(string(t[`symbol])))
+}
+
+pt=ParquetWin::loadParquetEx(db, "pt", "symbol", DATA_DIR+"/level.parquet", , , 135, 136, f1)
+assert 11, (exec count(*) from pt)==5159
+
+try{
+	dropDatabase("dfs://test_parquet")
+}catch(ex){print ex}
+db=database("dfs://test_parquet", HASH, [LONG, 30])
+pt=ParquetWin::loadParquetEx(db, "pt", "symbol", DATA_DIR+"/level.parquet", , , 135, 136)
+assert 12, (exec count(*) from pt)==5159
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/MDStockRecord_000001.SZ_202009_01-10.parquet")
+re = ParquetWin::loadParquet(DATA_DIR+"/MDStockRecord_000001.SZ_202009_01-10.parquet")
+assert 13, re.size()==40354
+nscm = table(`col as name, `INT as type)
+nscm.append!(scm)
+expected = loadText(DATA_DIR+"/MDStockRecord_000001.SZ_202009_01-10.csv", , nscm)
+expected.drop!(`col)
+assert 14, each(eqObj, re.values(), expected.values())
+
+@testing:case="test_parquet_saveParquet"
+//empty table
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet")
+assert 1, exists(WORK_DIR+"/t1.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t1.parquet")
+assert 2, scm.size()==t1.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t1.parquet")
+assert 3, re.size()==0
+
+
+//all nulls
+t2 = table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+for(i in 1..100){
+	insert into t2 values(bool(), char(), short(), int(), long(), date(), month(), time(), minute(), second(), datetime(), timestamp(), nanotime(), nanotimestamp(), float(), double(), string(), string())
+}
+
+ParquetWin::saveParquet(t2, WORK_DIR+"/t2.parquet")
+assert 4, exists(WORK_DIR+"/t2.parquet")==true
+
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+
+assert 5, scm.size()==t2.colNames().size()
+
+re=ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+for(col in re.colNames()){
+	assert 6, isNull(re[col])==true
+}
+
+//no nulls
+n=2000
+t3 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t3[`cbool]=take([true, false], n)
+t3[`cchar]=take(char(97..106), n)
+t3[`cshort]=1..2000
+t3[`cint]=1..2000
+t3[`clong]=1..2000
+t3[`cdate]=1960.01.01+0..1999
+t3[`cmonth]=1960.01M+0..1999
+t3[`ctime]=00:00:00.000+0..1999
+t3[`cminute]=take(00:00m+0..9, n)
+t3[`csecond]=00:00:00+0..1999
+t3[`cdatetime]=temporalAdd(1960.01.01T12:30:00, 0..1999, "d")
+t3[`ctimestamp]=temporalAdd(1960.01.01T12:30:00.008, 0..1999, "d")
+t3[`cnanotime]=temporalAdd(13:30:10.008007006, 0..1999, "s")
+t3[`cnanotimestamp]=temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s")
+t3[`cfloat]=1..2000+0.25
+t3[`cdouble]=1..2000+0.25
+t3[`cstring]="A"+string(1..n)
+t3[`csymbol]=symbol(take("BBB"+string(1..100), n)) //line 3447 ??
+ParquetWin::saveParquet(t3, WORK_DIR+"/t3.parquet")
+assert 7, exists(WORK_DIR+"/t3.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t3.parquet")
+assert 8, scm.size()==t3.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t3.parquet")
+
+assert 9, re[`cbool]==t3[`cbool] 
+assert 10, re[`cchar]==int(t3[`cchar])
+assert 11, re[`cshort]==t3[`cshort]
+
+assert 12, re[`cint]==t3[`cint]
+assert 13, re[`clong]==t3[`clong]
+assert 14, re[`cdate]==t3[`cdate]
+assert 15, re[`cmonth]==date(t3[`cmonth])
+assert 16, re[`ctime]==t3[`ctime]
+
+assert 17, re[`cminute]==time(t3[`cminute])
+
+assert 18, re[`csecond]==time(t3[`csecond])
+
+
+
+
+assert 19, re[`cdatetime]==timestamp(t3[`cdatetime])
+assert 20, re[`ctimestamp]==t3[`ctimestamp]
+assert 21, re[`cnanotime]==t3[`cnanotime]
+assert 22, re[`cnanotimestamp]==t3[`cnanotimestamp]
+assert 23, eqObj(re[`cfloat], t3[`cfloat]) 
+
+
+assert 24, eqObj(re[`cdouble], t3[`cdouble])
+assert 25, eqObj(re[`cstring], t3[`cstring])
+assert 26, eqObj(re[`csymbol], t3[`csymbol])
+
+//some nulls
+n=2000
+t4 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t4[`cbool]=rand([true, false, NULL], n)
+t4[`cchar]=rand(char(97..106) join NULL, n)
+t4[`cshort]=rand(-100..100 join NULL, n)
+t4[`cint]=rand(-100..100 join NULL, n)
+t4[`clong]=rand(-100..100 join NULL, n)
+t4[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t4[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t4[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t4[`cminute]=rand(00:00m+0..9 join NULL, n)
+t4[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t4[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t4[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t4[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t4[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t4[`cfloat]=rand(-100..100, n)+0.25
+t4[`cdouble]=rand(-100..100, n)+0.25
+t4[`cstring]=rand("A"+string(1..100) join NULL, n)
+t4[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t4, WORK_DIR+"/t4.parquet")
+assert 27, exists(WORK_DIR+"/t4.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t4.parquet")
+assert 28, scm.size()==t4.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t4.parquet")
+assert 29, re[`cbool]==t4[`cbool]
+assert 30, re[`cchar]==int(t4[`cchar])
+assert 31, re[`cshort]==t4[`cshort]
+assert 32, re[`cint]==t4[`cint]
+assert 33, re[`clong]==t4[`clong]
+assert 34, re[`cdate]==t4[`cdate]
+assert 35, re[`cmonth]==date(t4[`cmonth])
+assert 36, re[`ctime]==t4[`ctime]
+assert 37, re[`cminute]==time(t4[`cminute])
+assert 38, re[`csecond]==time(t4[`csecond])
+assert 39, re[`cdatetime]==timestamp(t4[`cdatetime])
+assert 40, re[`ctimestamp]==t4[`ctimestamp]
+assert 41, re[`cnanotime]==t4[`cnanotime]
+assert 42, re[`cnanotimestamp]==t4[`cnanotimestamp]
+assert 43, eqObj(re[`cfloat], t4[`cfloat])
+assert 44, eqObj(re[`cdouble], t4[`cdouble])
+assert 45, eqObj(re[`cstring], t4[`cstring])
+assert 46, eqObj(re[`csymbol], t4[`csymbol])
+
+//huge data
+n=500000
+t5 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t5[`cbool]=rand([true, false, NULL], n)
+t5[`cchar]=rand(char(97..106) join NULL, n)
+t5[`cshort]=rand(-100..100 join NULL, n)
+t5[`cint]=rand(-100..100 join NULL, n)
+t5[`clong]=rand(-100..100 join NULL, n)
+t5[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t5[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t5[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t5[`cminute]=rand(00:00m+0..9 join NULL, n)
+t5[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t5[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t5[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t5[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t5[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t5[`cfloat]=rand(-100..100, n)+0.25
+t5[`cdouble]=rand(-100..100, n)+0.25
+t5[`cstring]=rand("A"+string(1..100) join NULL, n)
+t5[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t5, WORK_DIR+"/t5.parquet")
+assert 47, exists(WORK_DIR+"/t5.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+assert 48, scm.size()==t5.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t5.parquet")
+assert 49, re[`cbool]==t5[`cbool]
+assert 50, re[`cchar]==int(t5[`cchar])
+assert 51, re[`cshort]==t5[`cshort]
+assert 52, re[`cint]==t5[`cint]
+assert 53, re[`clong]==t5[`clong]
+assert 54, re[`cdate]==t5[`cdate]
+assert 55, re[`cmonth]==date(t5[`cmonth])
+assert 56, re[`ctime]==t5[`ctime]
+assert 57, re[`cminute]==time(t5[`cminute])
+assert 58, re[`csecond]==time(t5[`csecond])
+assert 59, re[`cdatetime]==timestamp(t5[`cdatetime])
+assert 60, re[`ctimestamp]==t5[`ctimestamp]
+assert 61, re[`cnanotime]==t5[`cnanotime]
+assert 62, re[`cnanotimestamp]==t5[`cnanotimestamp]
+assert 63, eqObj(re[`cfloat], t5[`cfloat])
+assert 64, eqObj(re[`cdouble], t5[`cdouble])
+assert 65, eqObj(re[`cstring], t5[`cstring])
+assert 66, eqObj(re[`csymbol], t5[`csymbol])
+
+//append true
+//n = 10000
+//t6 = table(rand(temporalAdd(2012.01.01T12:30:00, 1..100, "d"), n) as time, rand("A"+string(1..100), n) as sym, round(rand(100.0, n), 4) as price, rand(1000, n) as volume)
+//ParquetWin::saveParquet(t6, WORK_DIR+"/t6.parquet")
+//assert 67, exists(WORK_DIR+"/t6.parquet")==true
+//t7 = table(rand(temporalAdd(2012.01.01T12:30:00, 1..100, "d"), n) as time, rand("A"+string(1..100), n) as sym, round(rand(100.0, n), 4) as price, rand(1000, n) as volume)
+//ParquetWin::saveParquet(t7, WORK_DIR+"/t6.parquet", true)
+//re = ParquetWin::loadParquet(WORK_DIR+"/t6.parquet")
+//expected = unionAll(t6, t7)
+//assert 68, re[`time]==expected[`time]
+//assert 69, re[`sym]==expected[`sym]
+//assert 70, eqObj(re[`price], expected[`price])
+//assert 71, re[`volume]==expected[`volume]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion"
+//all nulls
+t1 = table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+for(i in 1..100){
+	insert into t1 values(bool(), char(), short(), int(), long(), date(), month(), time(), minute(), second(), datetime(), timestamp(), nanotime(), nanotimestamp(), float(), double(), string(), string())
+}
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet")
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t1.parquet")
+update scm set type="SYMBOL" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t1.parquet", scm)
+for(col in re.colNames()){
+	assert 1, isNull(re[col])==true
+}
+
+n=2000
+t2 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t2[`cbool]=rand([true, false, NULL], n)
+t2[`cchar]=rand(char(97..106) join NULL, n)
+t2[`cshort]=rand(-100..100 join NULL, n)
+t2[`cint]=rand(-100..100 join NULL, n)
+t2[`clong]=rand(-100..100 join NULL, n)
+t2[`cdate]=rand(1970.01.01+0..100 join NULL, n)
+t2[`cmonth]=rand(1970.01M+0..100 join NULL, n) 
+t2[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t2[`cminute]=rand(00:00m+0..9 join NULL, n)
+t2[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t2[`cdatetime]=rand(temporalAdd(1970.01.01T12:30:00, 0..100, "d") join NULL, n)
+t2[`ctimestamp]=rand(temporalAdd(1970.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t2[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t2[`cnanotimestamp]=rand(temporalAdd(1970.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t2[`cfloat]=(rand(-100..100, n-1)+0.25 ) join NULL
+t2[`cdouble]=(rand(-100..100, n-1)+0.25) join NULL
+t2[`cstring]=rand("A"+string(1..100) join NULL, n)
+t2[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t2, WORK_DIR+"/t2.parquet")
+//------------------ input type convert -----------------//
+//
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_date"
+//convert TimestampMicros to DATE
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+
+update scm set type="DATE" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 1, re[`timestamp_micros_column] == date(temp[`timestamp_micros_column])
+
+
+//convert Timemillis(default) to DATE
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATE" where name="ctime"
+update scm set type="DATE" where name="cminute"
+update scm set type="DATE" where name="csecond"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 2, re[`ctime] == date(int(t2[`ctime]))
+assert 3, re[`cminute] == date(int(t2[`cminute])*60000)
+assert 4, re[`csecond] == date(int(t2[`csecond])*1000)
+
+//convert TimestampMillis to DATE 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATE" where name="cdatetime"
+update scm set type="DATE" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, typestr(re[`cdatetime][0]) == "DATE"
+assert 6, typestr(re[`ctimestamp][0]) == "DATE"
+//assert 1, re[`cdatetime] == date(t2[`cdatetime])
+//re[`cdatetime]  -  date(t2[`cdatetime])
+
+//convert TimestampNanos to DATE
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATE" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 7, re[`cnanotimestamp] == date(t2[`cnanotimestamp])
+assert 8, typestr(re[`cnanotimestamp][0]) == "DATE"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_minute"
+//convert Date to minute
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+//scm中cdate的type为：DATE
+update scm set type="MINUTE" where name="cdate"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cdate] == minute(int(t2[`cdate]))
+
+
+//convert TimestampMicros to minute
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+
+update scm set type="MINUTE" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+
+assert 2, re[`timestamp_micros_column] == minute(temp[`timestamp_micros_column])
+
+//convert TimestampMillis to minute
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MINUTE" where name="cdatetime"
+update scm set type="MINUTE" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cdatetime] == minute(t2[`cdatetime])
+assert 4, re[`ctimestamp] == minute(t2[`ctimestamp])
+
+//convert TimestampNanos to minute
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MINUTE" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, re[`cnanotimestamp]  == minute(t2[`cnanotimestamp])
+
+//convert TimeMicros to minute
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="MINUTE" where name="time_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 6, re[`time_micros_column] == minute(temp[`time_micros_column])
+
+//convert TimeMillis to minute
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MINUTE" where name="cminute"
+update scm set type="MINUTE" where name="csecond"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 7, re[`cminute] == minute(t2[`cminute])
+assert 8, re[`csecond] == minute(t2[`csecond])
+
+//convert TimeNanos to minute
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MINUTE" where name="cnanotime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 9, re[`cnanotime] == minute(t2[`cnanotime])
+
+//convert time(default) to minute line 594 ??
+@testing:case="test_parquet_loadParquet_schema_data_conversion_time_to_minute"
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MINUTE" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_time"
+//convert Date to time
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIME" where name="cdate"
+update scm set type="TIME" where name="cmonth"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cdate] == time(int(t2[`cdate]))
+
+//convert TimestampMicros to time
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="TIME" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 2, re[`timestamp_micros_column] == time(temp[`timestamp_micros_column])
+
+//convert TimestampMillis to time
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIME" where name="cdatetime"
+update scm set type="TIME" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cdatetime] == time(t2[`cdatetime])
+assert 4, re[`ctimestamp] == time(t2[`ctimestamp]) 
+
+//convert TimestampNanos to time
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIME" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, re[`cnanotimestamp] == time(t2[`cnanotimestamp])
+
+//convert TimeMicros to time
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="TIME" where name="time_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 6, re[`time_micros_column] == time(temp[`time_micros_column])
+
+//convert TimeMillis to time
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIME" where name="cminute"
+update scm set type="TIME" where name="csecond"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 7, re[`cminute] == time(t2[`cminute])
+assert 8, re[`csecond] == time(t2[`csecond])
+
+//convert TimeNanos to time
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIME" where name="cnanotime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 9, re[`cnanotime] == time(t2[`cnanotime])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_second"
+//convert Date to second
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SECOND" where name="cdate"
+update scm set type="SECOND" where name="cmonth"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cdate] == second(int(t2[`cdate]))
+
+//convert TimestampMicros to second
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="SECOND" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 2, re[`timestamp_micros_column] == second(temp[`timestamp_micros_column])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SECOND" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`ctime] == second(t2[`ctime])
+
+//convert TimestampMillis to second
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SECOND" where name="cdatetime"
+update scm set type="SECOND" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cdatetime] == second(t2[`cdatetime])
+assert 5, re[`ctimestamp] == second(t2[`ctimestamp]) 
+
+//convert TimestampNanos to second
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SECOND" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`cnanotimestamp] == second(t2[`cnanotimestamp])
+
+//convert TimeMicros to time
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="SECOND" where name="time_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 7, re[`time_micros_column] == second(temp[`time_micros_column])
+
+//convert TimeMillis to second
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SECOND" where name="cminute"
+update scm set type="SECOND" where name="csecond"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 8, re[`cminute] == second(t2[`cminute])
+assert 9, re[`csecond] == second(t2[`csecond])
+
+//convert TimeNanos to second
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SECOND" where name="cnanotime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 10, re[`cnanotime] == second(t2[`cnanotime])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_month"
+//convert Date to month
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MONTH" where name="cdate"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cdate] == month(t2[`cdate])
+
+
+//convert TimestampMicros to month
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="MONTH" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 2, re[`timestamp_micros_column] == month(temp[`timestamp_micros_column])
+//default
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MONTH" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`ctime] == month(int(t2[`ctime]))
+
+//convert TimestampMillis to month
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MONTH" where name="cdatetime"
+update scm set type="MONTH" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cdatetime] == month(t2[`cdatetime])
+assert 5, re[`ctimestamp] == month(t2[`ctimestamp]) 
+
+//convert TimestampNanos to month
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="MONTH" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`cnanotimestamp] == month(t2[`cnanotimestamp])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_datetime"
+//convert Date to datetime
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATETIME" where name="cdate"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cdate] == datetime(t2[`cdate]) //失败
+//convert TimestampMicros to datetime
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="DATETIME" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 2, re[`timestamp_micros_column] == datetime(temp[`timestamp_micros_column])
+
+//convert TimestampMicros to datetime
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATETIME" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+//assert 3, re[`ctime] == datetime(int(t2[`ctime]))// failed  datetime(1970.01.01 00:00:00.012)=1970.01.01 00:00:00
+assert 3, re[`ctime] == concatDateTime(1970.01.01,second(t2[`ctime]))
+/*re[`ctime]的值：
+1970.01.01 00:00:00	1970.01.01 00:00:00	1970.01.01 00:00:00
+
+t2[`ctime]的值：
+00:00:00.012	00:00:00.063	00:00:00.022
+datetime(int(t2[`ctime]))的值：
+1970.01.01 00:00:12	1970.01.01 00:01:03	1970.01.01 00:00:22
+*/
+//convert TimestampMillis to datetime
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATETIME" where name="cdatetime"
+update scm set type="DATETIME" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cdatetime] == datetime(t2[`cdatetime])
+assert 5, re[`ctimestamp] == datetime(t2[`ctimestamp]) 
+
+//convert TimestampNanos to datetime
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATETIME" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`cnanotimestamp] == datetime(t2[`cnanotimestamp])
+
+// @testing:case="test_parquet_loadParquet_schema_data_conversion_to_nanotime"
+// //convert Date to nanotime
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="NANOTIME" where name="cdate"
+// update scm set type="NANOTIME" where name="cmonth"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// //assert 1, re[`ctime] == nanotime(int(t2[`cdate]))
+// assert 1, typestr(re[`cdate][0]) == "NANOTIME"
+// assert 2, typestr(re[`cmonth][0]) == "NANOTIME"
+
+// //convert TimestampMicros to nanotime
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+// update scm set type="NANOTIME" where name="timestamp_micros_column"
+// re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+// temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+// assert 3, re[`timestamp_micros_column] == nanotime(temp[`timestamp_micros_column])
+
+// //convert TimestampMicros to nanotime
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="NANOTIME" where name="ctime"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// assert 4, re[`ctime] == nanotime(t2[`ctime])
+
+// //convert TimestampMillis to nanotime
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="NANOTIME" where name="cdatetime"
+// update scm set type="NANOTIME" where name="ctimestamp"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// assert 5, re[`cdatetime] == nanotime(t2[`cdatetime])
+// assert 6, re[`ctimestamp] == nanotime(t2[`ctimestamp]) 
+
+// //convert TimestampNanos to nanotime
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="NANOTIME" where name="cnanotimestamp"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// //exec cnanotimestamp from re//?
+// //assert 4, re[`cnanotimestamp] == nanotime(t2[`cnanotimestamp])
+
+// //convert TimeMicros to nanotime
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+// update scm set type="NANOTIME" where name="time_micros_column"
+// re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+// temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+// assert 7, re[`time_micros_column] == nanotime(temp[`time_micros_column])
+
+// //convert TimeMillis to nanotime
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="NANOTIME" where name="ctime"
+// update scm set type="NANOTIME" where name="cminute"
+// update scm set type="NANOTIME" where name="csecond"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) //crush
+// assert 8, re[`ctime] == nanotime(t2[`ctime])
+// assert 9, typestr(re[`cminute][0]) == "NANOTIME"
+// assert 10, typestr(re[`csecond][0]) == "NANOTIME"
+// //assert 6, re[`cminute] == nanotime(t2[`cminute])
+// //assert 7, re[`csecond] == nanotime(t2[`csecond])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_timestamp"
+//convert Date to timestamp
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIMESTAMP" where name="cdate"
+update scm set type="TIMESTAMP" where name="cmonth"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)//crush
+//assert 1, re[`cdate] == timestamp(t2[`cdate])
+assert 1, typestr(re[`cdate][0]) == "TIMESTAMP"
+
+//convert TimestampMicros to timestamp
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="TIMESTAMP" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 2, re[`timestamp_micros_column] == timestamp(temp[`timestamp_micros_column])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIMESTAMP" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+//assert 3, re[`ctime] == timestamp(int(second(t2[`ctime])))//failed
+assert 3, re[`ctime] == timestamp(int(t2[`ctime]))
+
+
+//convert TimestampNanos to timestamp
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="TIMESTAMP" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cnanotimestamp] == timestamp(t2[`cnanotimestamp]) 
+
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_nanotimestamp"
+//convert Date to nanotimestamp
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="NANOTIMESTAMP" where name="cdate"
+update scm set type="NANOTIMESTAMP" where name="cmonth"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)//crush
+assert 1, typestr(re[`cdate][0]) == "NANOTIMESTAMP"
+assert 2, typestr(re[`cmonth][0]) == "NANOTIMESTAMP"
+//assert 1, re[`cdate] == timestamp(int(t2[`cdate]))
+
+//convert TimestampMicros to nanotimestamp
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="NANOTIMESTAMP" where name="timestamp_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+assert 3, re[`timestamp_micros_column] == timestamp(temp[`timestamp_micros_column])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="NANOTIMESTAMP" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+//assert 4, re[`ctime] == timestamp(int(second(t2[`ctime])))//failed
+assert 4, re[`ctime] == timestamp(int(t2[`ctime]))
+
+
+//convert TimestampMillis to nanotimestamp
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="NANOTIMESTAMP" where name="cdatetime"
+update scm set type="NANOTIMESTAMP" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, re[`cdatetime] == nanotimestamp(t2[`cdatetime])
+assert 6, re[`ctimestamp] == nanotimestamp(t2[`ctimestamp])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_char"
+//convert bool to char
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cbool]==t2[`cbool]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="CHAR" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 2, re[`cbool]==t5[`cbool]
+
+//convert short to char
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cshort]==t2[`cshort]
+
+//convert int to char
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cint]==t2[`cint]
+
+//convert long to char
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, re[`clong]==t2[`clong]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="CHAR" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 6, re[`clong]==t5[`clong]
+
+//convert string to char
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 7, re[`cchar]==t2[`cchar]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DATE_to_char", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cdate"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+//assert 1, re[`cdate] == t2[`cdate] 
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_char", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="CHAR" where name="tx_time" //NANOTIMESTAMP
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, typestr(re[`tx_time][0]) == "CHAR"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")//Unsupported Parquet type
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")//int96_col	NANOTIMESTAMP  2024.07.31 02:10:56.577263393
+update scm set type="CHAR" where name="int96_col"  
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 1008 ??
+assert  2, typestr(re[`int96_col][0]) == "CHAR"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+update scm set type="CHAR" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+assert 3, typestr(re[`int96_col][0]) == "CHAR"
+
+//convert DOUBLE to char
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DOUBLE_to_char", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+//convert FLOAT to char
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FLOAT_to_char", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="CHAR" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+// //convert FIXED_LEN_BYTE_ARRAY to char 
+// @testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_char", exception=1
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+// update scm set type="CHAR" where name="_c3"
+// re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm) 
+
+// @testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_len_1"
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_fixed_len_byte_array_len1.parquet")
+// /*name	type
+// 0	id	INT
+// 1	fixed_len_column	STRING
+//  */
+// update scm set type="CHAR" where name="fixed_len_column"
+// re = ParquetWin::loadParquet(DATA_DIR+"/example_fixed_len_byte_array_len1.parquet", scm)
+// temp = ParquetWin::loadParquet(DATA_DIR+"/example_fixed_len_byte_array_len1.parquet")
+// /*id	fixed_len_column
+// 0	1	a
+// 1	2	b
+// 2	3	c */
+// assert  1, re[`fixed_len_column] == temp[`fixed_len_column]
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+// update scm set type="CHAR" where name="fixed_len_byte_array_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 1041??
+// assert  2, typestr(re[`fixed_len_byte_array_col][0]) == "CHAR"
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+// update scm set type="CHAR" where name="fixed_len_byte_array_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+// assert 3, typestr(re[`fixed_len_byte_array_col][0]) == "CHAR"
+
+//convert BYTE_ARRAY to char
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_char", exception=1
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="CHAR" where name="_c2"
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)//Exception expected but not raised
+
+
+// @testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_len1"
+// temp = table(1..3 as id, symbol(string(char(97..99))) as csymbol) 
+// ParquetWin::saveParquet(temp, WORK_DIR+"/temp.parquet")
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/temp.parquet")
+// update scm set type="CHAR" where name="csymbol"
+// re = ParquetWin::loadParquet(WORK_DIR+"/temp.parquet", scm)
+// assert  1, re[`csymbol] == temp[`csymbol]
+
+// temp5million = table(take(1..100, 5000000) as id , take(symbol(string(char(97..107))), 5000000) as csymbol)
+// ParquetWin::saveParquet(temp5million, WORK_DIR+"/temp5million.parquet")
+// re = ParquetWin::loadParquet(WORK_DIR+"/temp5million.parquet", scm) 
+// assert  2, re[`csymbol] == temp5million[`csymbol]
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+// update scm set type="CHAR" where name="byte_array_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+// assert 3, typestr(re[`byte_array_col][0]) == "CHAR"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_bool"
+//convert short to bool
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, eqObj(re[`cshort],bool(t2[`cshort])) //failed
+
+//convert int to bool
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 2, re[`cint]==bool(t2[`cint])
+
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="BOOL" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 3, re[`cint]==bool(t5[`cint])
+
+//convert long to bool
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`clong]==bool(t2[`clong])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="BOOL" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 5, re[`clong]==bool(t5[`clong])
+
+//convert DOUBLE to bool
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`cdouble]==bool(t2[`cdouble])//failed
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="BOOL" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+assert 7, re[`cdouble]==bool(t5[`cdouble])
+
+//convert FLOAT to bool
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+assert 8, re[`cfloat]==bool(t2[`cfloat])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="BOOL" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+assert 9, re[`cfloat]==bool(t5[`cfloat])
+
+//convert string to bool
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 10, re[`cchar]==bool(t2[`cchar])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="BOOL" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+assert 11, re[`cchar]==bool(t5[`cchar])
+
+//convert INT96 to bool
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_bool", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="BOOL" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+// assert 1, re[`tx_time] == bool(temp[`tx_time])
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+// update scm set type="BOOL" where name="int96_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 1192 ??
+// assert  2, typestr(re[`int96_col][0]) == "BOOL"
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+// update scm set type="BOOL" where name="int96_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+// assert 3, typestr(re[`int96_col][0]) == "BOOL"
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+// temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+// update temp set tx_time = 2020.02.11T00:58:49 where recieve_time =  2020.02.11T00:58:49.312000000 //line 1203 ??
+// update temp set tx_time = 2020.02.11 where recieve_time =  2020.02.11T00:58:49.336000000
+// ParquetWin::saveParquet(temp, WORK_DIR+"/temp.parquet")
+// update scm set type="BOOL" where name="tx_time"
+// re = ParquetWin::loadParquet(WORK_DIR+"/temp.parquet", scm)
+// assert 4, re[`tx_time] == bool(temp[`tx_time])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_bool"
+//convert FIXED_LEN_BYTE_ARRAY to bool
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="BOOL" where name="_c3"  //double to bool
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+temp=ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+assert 1 , re["_c3"]==bool(temp["_c3"])
+
+//convert BYTE_ARRAY to bool
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_bool", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="BOOL" where name="cstring"
+update scm set type="BOOL" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_int"
+//convert bool to int
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cbool]==bool(t2[`cbool])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="INT" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 2, re[`cbool]==bool(t5[`cbool])
+
+//convert long to int
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`clong]==t2[`clong]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="INT" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 4, re[`clong]==t5[`clong]
+
+//convert short to int
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, re[`cshort]==t2[`cshort]
+
+//convert double to int
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+temp = exec cdouble from t2;
+for(i in 0..1999){
+	if(temp[i] > 0){
+		temp[i] = floor(temp[i]);
+		}
+	else {
+		temp[i] = ceil(temp[i]);
+		}
+	//temp[i] = temp[i] >0 ? floor(temp[i]) : ceil(temp[i])	
+	}
+assert 6, re[`cdouble]==temp
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="INT" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 7, typestr(re[`cdouble][0]) ==  "INT"
+
+//convert float to int
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+temp = exec cfloat from t2;
+for(i in 0..1999){
+	if(temp[i] > 0){
+		temp[i] = floor(temp[i]);
+		}
+	else {
+		temp[i] = ceil(temp[i]);
+		}
+	//temp[i] = temp[i] >0 ? floor(temp[i]) : ceil(temp[i])	
+	}
+assert 8, re[`cfloat]==temp
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="INT" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 9, typestr(re[`cfloat][0]) ==  "INT"
+
+//convert string to int
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 10, re[`cchar]==t2[`cchar]
+
+//convert FIXED_LEN_BYTE_ARRAY to int
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_int"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="INT" where name="_c3"  //double to int
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+temp=ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+assert 1 ,re["_c3"]==int(temp["_c3"])
+
+//convert INT96 to int
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_int"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="INT" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, typestr(re[`tx_time][0]) == "INT"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="INT" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 1449 ??
+assert  2, typestr(re[`int96_col][0]) == "INT"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+update scm set type="INT" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+assert 3, typestr(re[`int96_col][0]) == "INT"
+
+//convert BYTE_ARRAY to int
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_int", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT" where name="cstring"
+update scm set type="INT" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int32_decimal_to_int"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int32_decimal.parquet")
+update scm set type="INT" where name="value" //double to int
+re = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet")
+assert 1, re[`value] ==int( temp[`value])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int64_decimal_to_int"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int64_decimal.parquet")
+update scm set type="INT" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet")
+assert 1, re[`value] == int(temp[`value])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BOOLEAN_to_DATE", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATE" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DOUBLE_to_DATE", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DATE" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_short"
+//convert bool to short
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cbool]==bool(t2[`cbool])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="SHORT" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 2, re[`cbool]==bool(t5[`cbool])
+
+//convert int to short
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cint]==t2[`cint]
+
+//convert long to short
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`clong]==t2[`clong]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="SHORT" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 5, re[`clong]==t5[`clong]
+
+//convert double to short
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+temp = exec cdouble from t2;
+for(i in 0..1999){
+	if(temp[i] > 0){
+		temp[i] = floor(temp[i]);
+		}
+	else {
+		temp[i] = ceil(temp[i]);
+		}
+	//temp[i] = temp[i] >0 ? floor(temp[i]) : ceil(temp[i])	
+	}
+assert 4, re[`cdouble]==temp
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="SHORT" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 5, typestr(re[`cdouble][0]) == "SHORT"
+
+//convert float to short
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+temp = exec cfloat from t2;
+for(i in 0..1999){
+	if(temp[i] > 0){
+		temp[i] = floor(temp[i]);
+		}
+	else {
+		temp[i] = ceil(temp[i]);
+		}
+	//temp[i] = temp[i] >0 ? floor(temp[i]) : ceil(temp[i])	
+	}
+assert 5, re[`cfloat]==temp
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="SHORT" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 6, typestr(re[`cfloat][0]) == "SHORT"
+
+//convert string to short
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`cchar]==t2[`cchar]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_short"
+//convert FIXED_LEN_BYTE_ARRAY to short
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="SHORT" where name="_c3" // double to short
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+assert 1, re["_c3"]==short(temp["_c3"])
+
+//convert INT96 to short
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_bool", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="SHORT" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+// assert 1, typestr(re[`tx_time][0]) == "SHORT"
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+// update scm set type="SHORT" where name="int96_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 1728??
+// assert  2, typestr(re[`int96_col][0]) == "SHORT"
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+// update scm set type="SHORT" where name="int96_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+// assert 3, typestr(re[`int96_col][0]) == "SHORT"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_short", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cstring"
+update scm set type="SHORT" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DATE_to_short", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cdate"
+update scm set type="SHORT" where name="cmonth"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT32_default"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int32_decimal.parquet")
+update scm set type="SHORT" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet", scm) 
+temp=ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet")
+assert 1 ,re["value"] == short(temp["value"])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_TIME_to_short", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="ctime"
+update scm set type="SHORT" where name="cminute"
+update scm set type="SHORT" where name="csecond"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// assert 1, re[`ctime] == t2[`ctime]
+// assert 2, typestr(re[`cminute][0]) == "SHORT"
+// assert 3, typestr(re[`csecond][0]) == "SHORT"
+
+// // line 1634.. ??
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_id_and_converted_types.parquet")
+// update scm set type="SHORT" where name="c2"
+// update scm set type="SHORT" where name="c3"
+// update scm set type="SHORT" where name="c4"
+// re = ParquetWin::loadParquet(DATA_DIR+"/example_id_and_converted_types.parquet", scm)
+// temp = ParquetWin::loadParquet(DATA_DIR+"/example_id_and_converted_types.parquet")
+// assert 4, re[`c2] == short(temp[`c2])
+// assert 5, re[`c3] == short(temp[`c3])
+// assert 6, re[`c4] == short(temp[`c4])
+
+//convert PT:INT64  time_micros to short   line1694
+@testing:case="test_parquet_loadParquet_schema_data_conversion_TIMEMICROS_to_short", exception=1 
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_various_times_and_timestamps.parquet")
+update scm set type="SHORT" where name="time_micros_column"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_various_times_and_timestamps.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_TIMESTAMP_to_short", exception=1 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SHORT" where name="cdatetime"
+update scm set type="SHORT" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// assert 2, typestr(re[`cdatetime][0]) == "SHORT"
+// assert 3, typestr(re[`ctimestamp][0]) == "SHORT"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_UINT_to_short"
+scm = ParquetWin::extractParquetSchema(DATA_DIR + "/example_UINT.parquet")
+update scm set type="SHORT" where name="uint8_col"
+update scm set type="SHORT" where name="uint16_col"
+update scm set type="SHORT" where name="uint32_col"
+re = ParquetWin::loadParquet(DATA_DIR + "/example_UINT.parquet", scm)
+assert 1, typestr(re[`uint8_col][0]) == "SHORT"
+assert 2, typestr(re[`uint16_col][0]) == "SHORT"
+assert 3, typestr(re[`uint32_col][0]) == "SHORT"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR + "/example_UINT.parquet")
+update scm set type="SHORT" where name="uint64_col"
+re = ParquetWin::loadParquet(DATA_DIR + "/example_UINT.parquet", scm)
+assert 4, typestr(re[`uint64_col][0]) == "SHORT"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT32NN_to_short"
+//INT32NN: physical_type: INT32 logical_type and converted_type: None 
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_UINT.parquet") //line 1617b??
+update scm set type="SHORT" where name="id"
+re = ParquetWin::loadParquet(DATA_DIR+"/example_UINT.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/example_UINT.parquet")
+assert 1, re["id"]==short(temp["id"])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT64NN_to_short"
+//INT64NN: physical_type: INT64 logical_type and converted_type: None 
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet") //line 1672b??
+update scm set type="SHORT" where name="volume"
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet")
+assert 1, re["volume"]==short(temp["volume"])
+
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_long"
+//convert bool to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cbool]==bool(t2[`cbool])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="LONG" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 2, re[`cbool]==bool(t5[`cbool])
+
+//convert int to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cint]==t2[`cint]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="LONG" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 4, re[`cint]==t5[`cint]
+
+//convert short to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 5, re[`cshort]==t2[`cshort]
+
+//convert double to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+temp = exec cdouble from t2;
+for(i in 0..1999){
+	if(temp[i] > 0){
+		temp[i] = floor(temp[i]);
+		}
+	else {
+		temp[i] = ceil(temp[i]);
+		}
+	//temp[i] = temp[i] >0 ? floor(temp[i]) : ceil(temp[i])	
+	}
+assert 6, re[`cdouble]==temp
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="LONG" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 7, typestr(re[`cdouble][0]) == "LONG"
+
+//convert float to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+temp = exec cfloat from t2;
+for(i in 0..1999){
+	if(temp[i] > 0){
+		temp[i] = floor(temp[i]);
+		}
+	else {
+		temp[i] = ceil(temp[i]);
+		}
+	//temp[i] = temp[i] >0 ? floor(temp[i]) : ceil(temp[i])	
+	}
+assert 8, re[`cfloat]==temp
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="LONG" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 9, typestr(re[`cfloat][0]) == "LONG"
+
+//convert string to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 10, re[`cchar]==t2[`cchar]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DOUBLE_to_not_LONG", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet") // line 2049??
+update scm set type="SECOND" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FLOAT_to_not_LONG", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet") // line 2077 ??
+update scm set type="SECOND" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int32_decimal_to_long"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int32_decimal.parquet")
+update scm set type="LONG" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet")
+assert 1, re[`value] ==long( temp[`value])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int64_decimal_to_long"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int64_decimal.parquet")
+update scm set type="LONG" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet")
+assert 1, re[`value] ==long( temp[`value])
+
+//convert FIXED_LEN_BYTE_ARRAY to long
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_long"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="LONG" where name="_c3" //double to long
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+assert 1, re[`_c3] ==long( temp[`_c3])
+
+//convert INT96 to long
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_long"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="LONG" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, typestr(re[`tx_time][0]) == "LONG"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="LONG" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 1989 ??
+assert  2, typestr(re[`int96_col][0]) == "LONG"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+update scm set type="LONG" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+assert 3, typestr(re[`int96_col][0]) == "LONG"
+
+//convert INT96 to TIMESTAMP 
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_TIMESTAMP"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="TIMESTAMP" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, re[`tx_time] == timestamp(temp[`tx_time])
+
+//convert INT96 to NONATIME  
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_NANOTIME"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="NANOTIME" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, typestr(re[`tx_time][0]) == "NANOTIME"
+
+//convert INT96 to Date
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_DATE"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="DATE" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, typestr(re[`tx_time][0]) == "DATE"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_MONTH"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="MONTH" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, re[`tx_time] == month(temp[`tx_time])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_TIME"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="TIME" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, re[`tx_time] == time(temp[`tx_time])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_SECOND"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="SECOND" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, re[`tx_time] == second(temp[`tx_time])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_MINUTE"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="MINUTE" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, re[`tx_time] == minute(temp[`tx_time])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_DATETIME"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="DATETIME" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, re[`tx_time] == datetime(temp[`tx_time])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_long", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cstring"
+update scm set type="LONG" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_TimeNanos_to_long"
+//convert TimeNanos to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cnanotime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cnanotime] - 48656008007006 == nanotime(t2[`cnanotime]) - 13:30:56.008007006
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_TimestampNanos_to_long"
+//convert TimestampNanos to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cnanotimestamp] - 48717008007006 == nanotime(t2[`cnanotimestamp]) - 13:31:57.008007006
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_TIMESTAMP_to_long"
+//convert TIMESTAMP to long
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="LONG" where name="cdatetime"
+update scm set type="LONG" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, (re[`cdatetime] - 1341000000 ) / 1000== t2[`cdatetime] - 1970.01.16T12:30:00
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_float"
+//convert bool to float
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cbool]==bool(t2[`cbool])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="FLOAT" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+assert 2, re[`cbool]==bool(t5[`cbool])
+
+//convert short to float
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cshort]==t2[`cshort]
+
+//convert int to float
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cint]==t2[`cint]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="FLOAT" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 5, re[`cint]==t5[`cint]
+
+//convert long to float
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`clong]==t2[`clong]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="FLOAT" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 7, re[`clong]==t5[`clong]
+
+//convert double to float
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 8, re[`cdouble]==t2[`cdouble]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="FLOAT" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 9, re[`cdouble]==t5[`cdouble]
+
+//convert FIXED_LEN_BYTE_ARRAY to float
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="FLOAT" where name="_c3"
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+assert 10, re[`_c3]==temp[`_c3]
+
+
+
+//convert string to FLOAT
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 12, re[`cchar]==t2[`cchar]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_fixed_len_byte_array_to_float",exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="FLOAT" where name="fixed_len_byte_array_col" //string to float
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 2330 ??
+//assert  11, typestr(re[`fixed_len_byte_array_col][0]) == "FLOAT"
+
+//convert INT96 to float
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_float"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="FLOAT" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 13, typestr(re[`tx_time][0]) == "FLOAT"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="FLOAT" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 2243??
+assert  2, typestr(re[`int96_col][0]) == "FLOAT"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+update scm set type="FLOAT" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+assert 3, typestr(re[`int96_col][0]) == "FLOAT"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int32_decimal_to_float"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int32_decimal.parquet")
+update scm set type="FLOAT" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet")
+assert 1, re[`value] ==float( temp[`value])
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int32_decimal_NULL.parquet")
+update scm set type="FLOAT" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal_NULL.parquet", scm) // line 2169 ?? 插入NULL后物理类型变成FIXED_LEN_BYTE_ARRAY
+temp = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal_NULL.parquet")
+assert 2, re[`value] == float( temp[`value])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int64_decimal_to_float"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int64_decimal.parquet")
+update scm set type="FLOAT" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet")
+assert 1, re[`value] == float( temp[`value])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_float", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="FLOAT" where name="cstring"
+update scm set type="FLOAT" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_bool_to_double"
+//convert bool to double
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="cbool" 
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, re[`cbool]==bool(t2[`cbool])
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_boolshort_to_double"
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="DOUBLE" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 1, re[`cbool]==bool(t5[`cbool])
+
+//convert short to double
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 3, re[`cshort]==t2[`cshort]
+
+//convert int to DOUBLE
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cint]==t2[`cint]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="DOUBLE" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 5, re[`cint]==t5[`cint]
+
+//convert long to DOUBLE
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`clong]==t2[`clong]
+
+//convert float to DOUBLE
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+assert 7, typestr(re[`cfloat][0]) == "DOUBLE"
+//assert 7, re[`cfloat]==double(t2[`cfloat])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="DOUBLE" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 8, re[`cfloat]==t5[`cfloat]
+
+//convert FIXED_LEN_BYTE_ARRAY to DOUBLE
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="DOUBLE" where name="_c3"
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+assert 9, re[`_c3]==temp[`_c3]
+
+// scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+// temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+// update scm set type="DOUBLE" where name="fixed_len_byte_array_col"
+// re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 2586 ??
+// assert  2, typestr(re[`fixed_len_byte_array_col][0]) == "DOUBLE"
+
+//convert string to double
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 11, re[`cchar]==t2[`cchar]
+
+//convert INT96 to double
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_double"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="DOUBLE" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+assert 1, typestr(re[`tx_time][0]) == "DOUBLE"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="DOUBLE" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 2491 ??
+assert  2, typestr(re[`int96_col][0]) == "DOUBLE"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+update scm set type="DOUBLE" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+assert 3, typestr(re[`int96_col][0]) == "DOUBLE"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int32_decimal_to_double"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int32_decimal.parquet")
+update scm set type="DOUBLE" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int32_decimal.parquet")
+assert 1, re[`value] == temp[`value]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_int64_decimal_to_double"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/int64_decimal.parquet")
+update scm set type="DOUBLE" where name="value"
+re = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet", scm)
+temp = ParquetWin::loadParquet(DATA_DIR+"/int64_decimal.parquet")
+assert 1, re[`value] == temp[`value]
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_double", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="DOUBLE" where name="cstring"
+update scm set type="DOUBLE" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_string"
+//convert bool to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 1, bool(re[`cbool])==t2[`cbool]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="STRING" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+temp = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet")
+assert 2, bool(re[`cbool])==temp[`cbool]
+
+
+//convert short to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+assert 3, re[`cshort]==string(t2[`cshort])
+
+
+//convert int to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 4, re[`cint]==string(t2[`cint])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="STRING" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+assert 5, re[`cint]==string(t5[`cint])
+
+//convert long to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+assert 6, re[`clong]==string(t2[`clong])
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="STRING" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm)
+assert 7, re[`clong]==string(t5[`clong])
+
+//convert double to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm) 
+assert 8, double(re[`cdouble])==t2[`cdouble]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="STRING" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 9, double(re[`cdouble])==t5[`cdouble]
+
+//convert float to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)  
+assert 10, float(re[`cfloat])==t2[`cfloat]
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+update scm set type="STRING" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t5.parquet", scm) 
+assert 11, float(re[`cfloat])==t5[`cfloat]
+
+//convert INT96 to string
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="STRING" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+assert 12, typestr(re[`tx_time][0]) == "STRING"
+
+//convert symbol to string
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="csymbol"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 1, eqObj(reColType.values(),scm.values())
+assert 2, re[`csymbol]==t2[`csymbol]
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="STRING" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 2720 ??
+assert  13, typestr(re[`int96_col][0]) == "STRING"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_NULL.parquet") //has NULL
+update scm set type="STRING" where name="int96_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet", scm) 
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_NULL.parquet")
+assert 14, typestr(re[`int96_col][0]) == "STRING"
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_String"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="STRING" where name="clear_price"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+assert 1, typestr(re[`clear_price][0]) == "STRING"
+
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/INT96_5million.parquet")
+temp = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet")
+update scm set type="STRING" where name="fixed_len_byte_array_col"
+re = ParquetWin::loadParquet(DATA_DIR+"/INT96_5million.parquet", scm) // line 2830 ??
+assert  2, typestr(re[`fixed_len_byte_array_col][0]) == "STRING"
+//line2630
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BOOL_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="UUID" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// temp = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+// assert 1,re[`cbool]==uuid(string(int(temp[`cbool])))
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BOOL_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT128" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT32_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="UUID" where name="cshort"
+update scm set type="UUID" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT32_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT128" where name="cshort"
+update scm set type="INT128" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT64_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="UUID" where name="clong"//?column 4 Parquet:INT32->UUID
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT64_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT128" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="UUID" where name="tx_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_INT96_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="INT128" where name="tx_time"
+update scm set type="INT128" where name="recieve_time"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DOUBLE_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="UUID" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_DOUBLE_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT128" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)//column 15 Parquet:INT32->INT128??
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FLOAT_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="UUID" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FLOAT_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="INT128" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)//column 14 Parquet:INT32->INT128??
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_String_INT128", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="INT128" where name="clear_price"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+update scm set type="UUID" where name="clear_price"
+re = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_FIXED_LEN_BYTE_ARRAY16_to_String_UUID", exception=1
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_fixed_len_byte_array_len.parquet")
+update scm set type="UUID" where name="fixed_len_16_column" 
+re = ParquetWin::loadParquet(DATA_DIR+"/example_fixed_len_byte_array_len.parquet", scm)
+//assert 1, typestr(re[`fixed_len_16_column][0]) == "UUID"
+
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_NULL_to_int"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/example_null.parquet")
+re = ParquetWin::loadParquet(DATA_DIR+"/example_null.parquet", scm)
+assert 1, re.columnNames()==`null_column`int_column
+assert 2, eqObj(re[`null_column], take(int(), 5)) //failed,re[`null_column]应该都是空值，现在都是0
+assert 3, eqObj(re[`int_column], 1..5)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_String_UUID", exception=1
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="UUID" where name="_c2"
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_BYTE_ARRAY_to_String_INT128", exception=1
+temp = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+update scm set type="INT128" where name="_c2"
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet", scm)
+
+@testing:case="test_parquet_loadParquet_schema_data_conversion_to_symbol"
+//convert string to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cstring"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 1, eqObj(reColType.values(),scm.values())
+assert 2, string(re[`cstring])==t2[`cstring]
+
+//convert bool to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cbool"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 3, eqObj(reColType.values(),scm.values())
+assert 4, bool(re[`cbool])==t2[`cbool]
+
+//convert char to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cchar"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+temp = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 5, eqObj(reColType.values(),scm.values())
+assert 6, re[`cchar]==symbol(string(t2[`cchar]))
+
+
+
+//convert short to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cshort"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 7, eqObj(reColType.values(),scm.values())
+assert 8, short(re[`cshort])==t2[`cshort] //failed
+
+
+
+//convert int to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cint"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 9, eqObj(reColType.values(),scm.values())
+assert 10, int(re[`cint])==t2[`cint]
+
+//convert long to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="clong"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 11, eqObj(reColType.values(),scm.values())
+assert 12, long(re[`clong])==t2[`clong]
+
+//convert double to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cdouble"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 13, eqObj(reColType.values(),scm.values())
+assert 14, double(re[`cdouble])==t2[`cdouble]
+
+//convert float to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cfloat"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 15, eqObj(reColType.values(),scm.values())
+assert 16, float(re[`cfloat])==t2[`cfloat]
+
+//convert date to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cdate"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 17, eqObj(reColType.values(),scm.values())
+assert 18, long(re[`cdate])==long(t2[`cdate])//failed
+
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="STRING" where name="cdate"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 19, eqObj(reColType.values(),scm.values())
+assert 20, long(re[`cdate])==long(t2[`cdate]) // failed 
+
+//convert month to symbol 
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="SYMBOL" where name="cmonth"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// reColType = exec name, typeString from re.schema()[`colDefs]
+// assert 19, eqObj(reColType.values(),scm.values())
+// assert 20, long(re[`cmonth])==long(t2[`cmonth])
+
+//convert time to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="ctime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 21, eqObj(reColType.values(),scm.values())
+assert 22, long(re[`ctime])==long(t2[`ctime])//failed
+
+//convert minute to symbol 
+// scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+// update scm set type="SYMBOL" where name="cminute"
+// re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+// reColType = exec name, typeString from re.schema()[`colDefs]
+// assert 23, eqObj(reColType.values(),scm.values())
+// assert 24, long(re[`cminute])==long(t2[`cminute])
+
+//convert second to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="csecond"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 25, eqObj(reColType.values(),scm.values())
+assert 26, long(re[`csecond])/1000==long(t2[`csecond]) //failed
+
+//convert datetime to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cdatetime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 27, eqObj(reColType.values(),scm.values())
+assert 28, long(datetime(re[`cdatetime]))==long(t2[`cdatetime])//failed
+
+//convert timestamp to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="ctimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 29, eqObj(reColType.values(),scm.values())
+assert 30, long(timestamp(re[`ctimestamp]))==long(t2[`ctimestamp])
+
+//convert nanotime to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cnanotime"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+temp = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 31, eqObj(reColType.values(),scm.values())
+assert 32, long(nanotime(re[`cnanotime]))==long(temp[`cnanotime]) //failed
+
+//convert nanotimestamp to symbol 
+scm = ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+update scm set type="SYMBOL" where name="cnanotimestamp"
+re = ParquetWin::loadParquet(WORK_DIR+"/t2.parquet", scm)
+reColType = exec name, typeString from re.schema()[`colDefs]
+assert 33, eqObj(reColType.values(),scm.values())
+assert 34, long(nanotimestamp(re[`cnanotimestamp]))==long(t2[`cnanotimestamp]) 
+
+//support uint64
+@testing:case="test_parquet_support_int64"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/quotademo.parquet")
+update scm set type=`INT  where name="Type"
+update scm set name=strReplace(name, "[", "_")
+update scm set name=strReplace(name, "]", "_")
+update scm set name="c"+name where startsWith(name, "_")
+nscm = table(`col0 as name, `INT as type)
+nscm.append!(scm)
+delete from nscm where name=`c__index_level_0__
+update nscm set type="SHORT" where name=`ExID
+expected = loadText(DATA_DIR+"/quotademo.csv", , nscm)
+replaceColumn!(expected, `ExID, char(expected[`ExID]))
+typestr(expected[`ExID])
+re = ParquetWin::loadParquet(DATA_DIR+"/quotademo.parquet", scm)
+re.reorderColumns!(`c__index_level_0__)
+assert 1, each(eqObj, re.values(), expected.values())
+
+ds = ParquetWin::parquetDS(DATA_DIR+"/quotademo.parquet")
+re = mr(ds, x->x)[0][0]
+re.reorderColumns!(`__index_level_0__)
+assert 2, each(eqObj, re.values(), expected.values())
+
+@testing:case="test_parquet_loadParquet_error"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/session_filtering_sample.parquet")
+re = ParquetWin::loadParquet(DATA_DIR+"/session_filtering_sample.parquet")
+nscm = table(`col as name, `INT as type)
+nscm.append!(scm)
+expected = loadText(DATA_DIR+"/session_filtering_sample.csv", , nscm)
+expected.drop!(`col)
+assert 1, each(eqObj, re.values(), expected.values())
+
+ds = ParquetWin::parquetDS(DATA_DIR+"/session_filtering_sample.parquet")
+re = mr(ds, x->x)[0][0]
+assert 2, each(eqObj, re.values(), expected.values())
+
+login("admin", "123456")
+dbName="dfs://test_parquet"
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+db=database(dbName, VALUE, ["APLE.5"])
+pt=db.createPartitionedTable(re, `pt, `prefix)
+ParquetWin::loadParquetEx(db, `pt, `prefix, DATA_DIR+"/session_filtering_sample.parquet")
+re = select * from pt order by dt_minute, prefix
+expected.sortBy!(`dt_minute`prefix)
+assert 3, each(eqObj, re.values(), expected.values())
+
+@testing:case="test_parquet_loadParquet_fixed_len_byte_array"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+out_type = exec type from scm where name = `_c3
+assert 1,out_type[0] == "DOUBLE"
+re_0 = ParquetWin::loadParquet(DATA_DIR+"/part-00000-a7992322-17b0-49fd-b0e6-c777e47df6aa-c000.snappy.parquet")
+size = re_0.size()
+re = select * from re_0 limit 1,size
+assert 2,typestr(re[`_c3][0]) == `DOUBLE
+ex = loadText(DATA_DIR+"/test_fixed_len_byte_array.csv")
+assert 3,each(eqObj,double(re[`_c2]),ex[`Age],2) 
+assert 5,each(eqObj,re[`_c1],ex[`Site])
+
+
+@testing:case="test_parquet_loadParquet_fixed_len_byte_array_really_data"
+scm_2 = ParquetWin::extractParquetSchema(DATA_DIR+"/part.snappy.parquet")
+
+nscm = table(`col0 as name, `INT as type)
+nscm.append!(scm_2)
+re_2 = ParquetWin::loadParquet(DATA_DIR+"/part.snappy.parquet")
+ex_2 = loadText(DATA_DIR+"/fixed_len_byte_array_data.csv",,nscm)
+date_time = select nanotimestamp(tx_time) as tx_time,nanotimestamp(recieve_time) as recieve_time from loadText(DATA_DIR+"/fixed_len_byte_array_data.csv")
+update ex_2 set  tx_time =date_time.tx_time ,recieve_time =date_time.recieve_time 
+dropColumns!(ex_2,`col0)
+assert 1,each(eqObj,ex_2.values(),re_2.values(),3) //failed
+
+cnt=ex_2.columnNames().size()
+for (i in 0:40){
+	if (not eqObj(ex_2[ex_2.columnNames()[i]],re_2[ex_2.columnNames()[i]],3))
+	 print ex_2.columnNames()[i]
+} 
+
+
+@testing:case="test_parquet_loadParquet_fixed_len_byte_array_null"
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/part-00000-5efd7b9b-8617-413f-b341-fe8ab1894e34-c000.snappy.parquet")
+out_type = exec type from scm where name = `_c3
+assert 1,out_type[0] == "DOUBLE"
+re_0 = ParquetWin::loadParquet(DATA_DIR+"/part-00000-5efd7b9b-8617-413f-b341-fe8ab1894e34-c000.snappy.parquet")
+size = re_0.size()
+re = select * from re_0 limit 1,size
+assert 2,typestr(re[`_c3][0]) == `DOUBLE
+ex = loadText(DATA_DIR+"/test_fixed_len_byte_array.csv")
+assert 3,each(isNull,re[`_c3])
+
+@testing:case="test_parquet_extractParquetSchema_execute_multi_times"
+for(i in 1..100){
+	re = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")	
+}
+assert 1, re[`name]==`open`high`low`close`amount`volume`成交时间
+assert 2, re[`type]==`DOUBLE`DOUBLE`DOUBLE`DOUBLE`DOUBLE`LONG`TIMESTAMP
+
+@testing:case="test_parquet_loadParquet_execute_multi_times"
+for(i in 1..100){
+	re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-5efd7b9b-8617-413f-b341-fe8ab1894e34-c000.snappy.parquet")
+}
+assert 1,  eqObj(re[`_c0], [NULL, "0", "1", "2"])
+assert 2,  eqObj(re[`_c1], ["Site",  "Google",  "Runoob", "Wiki"])
+assert 3,  eqObj(re[`_c2], ["Age",  "10.0",  NULL,  "13.0"])
+assert 4,  eqObj(re[`_c3], take(double(), 4))
+
+@testing:case="test_parquet_loadParquetEx_execute_multi_times"
+re = ParquetWin::loadParquet(DATA_DIR+"/part-00000-5efd7b9b-8617-413f-b341-fe8ab1894e34-c000.snappy.parquet")
+dbName = "dfs://test_parquet_multi_thread"
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)	
+}
+db = database(dbName, VALUE,  ["Site",  "Google",  "Runoob", "Wiki"])
+pt = createPartitionedTable(db, re, `pt, `_c1)
+for(i in 1..100){
+	ParquetWin::loadParquetEx(db, `pt, `_c1,DATA_DIR+"/part-00000-5efd7b9b-8617-413f-b341-fe8ab1894e34-c000.snappy.parquet")
+}
+ans = select * from pt order by `_c2
+assert 1,  eqObj(ans[`_c0], take(`0, 100) join take(`1, 100) join take(string(), 100) join take(`2, 100))
+assert 2,  eqObj(ans[`_c1], take("Google", 100) join take("Runoob", 100) join take("Site", 100) join take("Wiki", 100))
+assert 3,  eqObj(ans[`_c2], take("10.0", 100) join take(string(), 100) join take("Age", 100) join take("13.0", 100))
+assert 4,  eqObj(ans[`_c3], take(double(), 400))
+
+@testing:case="test_parquet_parquetDS_execute_multi_times"
+for(i in 1..100){
+	ds = ParquetWin::parquetDS(DATA_DIR+"/part-00000-5efd7b9b-8617-413f-b341-fe8ab1894e34-c000.snappy.parquet")
+}
+re = mr(ds, x->x)[0][0]
+assert 1,  eqObj(re[`_c0], [NULL, "0", "1", "2"])
+assert 2,  eqObj(re[`_c1], ["Site",  "Google",  "Runoob", "Wiki"])
+assert 3,  eqObj(re[`_c2], ["Age",  "10.0",  NULL,  "13.0"])
+assert 4,  eqObj(re[`_c3], take(double(), 4))
+
+@testing:case="test_parquet_saveParquet_execute_multi_times"
+t_mul= table(1..10 as x, 1..10 as y)
+for(i in 1..100){
+	ParquetWin::saveParquet(t_mul, WORK_DIR+"/t_mul.parquet")
+}
+re = ParquetWin::loadParquet(WORK_DIR+"/t_mul.parquet")
+assert 1, re[`x] == 1..10
+assert 2, re[`y] == 1..10
+
+
+@testing:case="test_parquet_mutli_Job_extractParquetSchema"
+t = table(100:0, `name`type, [STRING, STRING])
+share t as multiJob_shareT
+def submit_job_extractParquetSchema(WORK_DIR){
+	for(i in 1..100){
+		multiJob_shareT.append!(ParquetWin::extractParquetSchema( WORK_DIR+"/t_mul.parquet"))
+	}
+}
+
+jobs = []
+for(i in 1..3){
+	jobs.append!(submitJob("job_extractParquetSchema", "job extractParquetSchema", submit_job_extractParquetSchema, WORK_DIR))
+}
+for(job in jobs){
+	getJobReturn(job, true)	
+}
+
+ans = select * from multiJob_shareT order by name
+assert 1, ans[`name] == take(`x, 300) join take(`y, 300)
+assert 2, ans[`type] == take(`INT, 600)
+undef(`multiJob_shareT, SHARED)
+
+
+@testing:case="test_parquet_mutli_Job_loadParquet"
+t = table(100:0, `x`y, [INT, INT])
+share t as multiJob_shareT
+def submit_job_loadParquet(WORK_DIR){
+	for(i in 1..100){
+		multiJob_shareT.append!(ParquetWin::loadParquet( WORK_DIR+"/t_mul.parquet"))
+	}
+}
+jobs = []
+for(i in 1..3){
+	jobs.append!(submitJob("job_loadParquet", "job loadParquet", submit_job_loadParquet, WORK_DIR))
+}
+for(job in jobs){
+	getJobReturn(job, true)	
+}
+
+re = select * from multiJob_shareT order by x 
+ex = select * from table(take(1..10, 3000) as x, take(1..10, 3000) as y) order by x
+assert 1, eqObj(re.values(), ex.values())
+undef(`multiJob_shareT, SHARED)
+
+
+@testing:case="test_parquet_mutli_Job_loadParquetEx"
+re =ParquetWin::loadParquet( WORK_DIR+"/t_mul.parquet")
+t_mul1= table(1..3 as x, 1..3 as y)
+ParquetWin::saveParquet(t_mul1, WORK_DIR+"/t_mul1.parquet")
+t_mul2= table(4..6 as x, 4..6 as y)
+ParquetWin::saveParquet(t_mul2, WORK_DIR+"/t_mul2.parquet")
+t_mul3= table(7..10 as x, 7..10 as y)
+ParquetWin::saveParquet(t_mul3, WORK_DIR+"/t_mul3.parquet")
+
+dbName = "dfs://test_parquet_multi_thread"
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)	
+}
+db = database(dbName, VALUE,  1..10)
+pt = createPartitionedTable(db, re, `pt, `x)
+def submit_job_loadParquetEx(db, ptName, parColName, WORK_DIR, fileName){
+	for(i in 1..100){
+		ParquetWin::loadParquetEx(db, ptName, parColName, WORK_DIR+ fileName)
+	}
+}
+job1 = submitJob("job_loadParquetEx", "job loadParquet", submit_job_loadParquetEx, db, `pt, `x, WORK_DIR, "/t_mul1.parquet")
+job2 = submitJob("job_loadParquetEx", "job loadParquet", submit_job_loadParquetEx, db, `pt, `x, WORK_DIR, "/t_mul2.parquet")
+job3 = submitJob("job_loadParquetEx", "job loadParquet", submit_job_loadParquetEx, db, `pt, `x, WORK_DIR, "/t_mul3.parquet")
+getJobReturn(job1, true)
+getJobReturn(job2, true)
+getJobReturn(job3, true)
+
+ans = select * from pt order by x
+ex = select * from table(take(1..10, 1000) as x, take(1..10, 1000) as y) order by x
+assert 1, eqObj(ans.values(), ex.values())
+
+
+@testing:case="test_parquet_mutli_Job_parquetDS"
+t = table(100:0, `x`y, [INT, INT])
+share t as multiJob_shareT
+def submitJob_parquetDs(WORK_DIR, ans){
+	for(i in 1..100){
+		ds = ParquetWin::parquetDS(WORK_DIR+"/t_mul.parquet")
+		re = mr(ds, x->x)[0][0]
+		multiJob_shareT.append!(re)
+	}
+}
+
+jobs = []
+for(i in 1..3){
+	jobs.append!(submitJob("job_parquetDS", "job parquetDS", submitJob_parquetDs, WORK_DIR, ans))
+}
+for(job in jobs){
+	getJobReturn(job, true)	
+}
+re = select * from multiJob_shareT order by x 
+ex = select * from table(take(1..10, 3000) as x, take(1..10, 3000) as y) order by x
+assert 1, eqObj(re.values(), ex.values())
+undef(`multiJob_shareT, SHARED)
+
+
+@testing:case="test_parquet_mutli_Job_saveParquet"
+t_mul= table(`a as x, `b as y)
+def submitJob_saveParquet(t, WORK_DIR){
+	for(i in 1..100){
+		ParquetWin::saveParquet(t, WORK_DIR+"/t_mul_saveParquet.parquet")
+	}
+}
+
+jobs = []
+for(i in 1..3){
+	jobs.append!(submitJob("job_saveParquet", "job saveParquet", submitJob_saveParquet, t_mul, WORK_DIR))
+}
+for(job in jobs){
+	getJobReturn(job, true)	
+}
+
+ans = ParquetWin::loadParquet(WORK_DIR+"/t_mul_saveParquet.parquet")
+ex = table(`a as x, `b as y)
+assert 1, eqObj(ans.values(), ex.values())
+
+
+@testing:case="test_parquet_saveParquet_compression_int", exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", 1)
+
+@testing:case="test_parquet_saveParquet_compression_bool", exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", true)
+
+@testing:case="test_parquet_saveParquet_compression_time",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", time(1))
+
+@testing:case="test_parquet_saveParquet_compression_vector",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", ["snappy", "snappy"])
+
+@testing:case="test_parquet_saveParquet_compression_pair",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", "snappy":"snappy")
+
+@testing:case="test_parquet_saveParquet_compression_matrix",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", 1..6$2:3)
+
+@testing:case="test_parquet_saveParquet_compression_set",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", set(["snappy", "gzip"]))
+
+@testing:case="test_parquet_saveParquet_compression_dict",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", dict(["snappy", "gzip"], ["snappy", "gzip"]))
+
+@testing:case="test_parquet_saveParquet_compression_table",exception=1
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", table(`snappy`gzip as x))
+
+
+@testing:case="test_parquet_saveParquet_compression_snappy"
+//empty table
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", "snappy")
+assert 1, exists(WORK_DIR+"/t1.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t1.parquet")
+assert 2, scm.size()==t1.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t1.parquet")
+assert 3, re.size()==0
+
+//all nulls
+t2 = table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+for(i in 1..100){
+	insert into t2 values(bool(), char(), short(), int(), long(), date(), month(), time(), minute(), second(), datetime(), timestamp(), nanotime(), nanotimestamp(), float(), double(), string(), string())
+}
+ParquetWin::saveParquet(t2, WORK_DIR+"/t2.parquet", "snappy")
+assert 4, exists(WORK_DIR+"/t2.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+assert 5, scm.size()==t2.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+for(col in re.colNames()){
+	assert 6, isNull(re[col])==true
+}
+
+//no nulls
+n=2000
+t3 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t3[`cbool]=take([true, false], n)
+t3[`cchar]=take(char(97..106), n)
+t3[`cshort]=1..2000
+t3[`cint]=1..2000
+t3[`clong]=1..2000
+t3[`cdate]=1960.01.01+0..1999
+t3[`cmonth]=1960.01M+0..1999
+t3[`ctime]=00:00:00.000+0..1999
+t3[`cminute]=take(00:00m+0..9, n)
+t3[`csecond]=00:00:00+0..1999
+t3[`cdatetime]=temporalAdd(1960.01.01T12:30:00, 0..1999, "d")
+t3[`ctimestamp]=temporalAdd(1960.01.01T12:30:00.008, 0..1999, "d")
+t3[`cnanotime]=temporalAdd(13:30:10.008007006, 0..1999, "s")
+t3[`cnanotimestamp]=temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s")
+t3[`cfloat]=1..2000+0.25
+t3[`cdouble]=1..2000+0.25
+t3[`cstring]="A"+string(1..n)
+t3[`csymbol]=take("BBB"+string(1..100), n)
+ParquetWin::saveParquet(t3, WORK_DIR+"/t3.parquet", "snappy")
+assert 7, exists(WORK_DIR+"/t3.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t3.parquet")
+assert 8, scm.size()==t3.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t3.parquet")
+assert 9, re[`cbool]==t3[`cbool]
+assert 10, re[`cchar]==int(t3[`cchar])
+assert 11, re[`cshort]==t3[`cshort]
+assert 12, re[`cint]==t3[`cint]
+assert 13, re[`clong]==t3[`clong]
+assert 14, re[`cdate]==t3[`cdate]
+assert 15, re[`cmonth]==date(t3[`cmonth])
+assert 16, re[`ctime]==t3[`ctime]
+assert 17, re[`cminute]==time(t3[`cminute])
+assert 18, re[`csecond]==time(t3[`csecond])
+assert 19, re[`cdatetime]==timestamp(t3[`cdatetime])
+assert 20, re[`ctimestamp]==t3[`ctimestamp]
+assert 21, re[`cnanotime]==t3[`cnanotime]
+assert 22, re[`cnanotimestamp]==t3[`cnanotimestamp]
+assert 23, eqObj(re[`cfloat], t3[`cfloat])
+assert 24, eqObj(re[`cdouble], t3[`cdouble])
+assert 25, eqObj(re[`cstring], t3[`cstring])
+assert 26, eqObj(re[`csymbol], t3[`csymbol])
+
+//some nulls
+n=2000
+t4 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t4[`cbool]=rand([true, false, NULL], n)
+t4[`cchar]=rand(char(97..106) join NULL, n)
+t4[`cshort]=rand(-100..100 join NULL, n)
+t4[`cint]=rand(-100..100 join NULL, n)
+t4[`clong]=rand(-100..100 join NULL, n)
+t4[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t4[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t4[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t4[`cminute]=rand(00:00m+0..9 join NULL, n)
+t4[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t4[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t4[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t4[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t4[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t4[`cfloat]=rand(-100..100, n)+0.25
+t4[`cdouble]=rand(-100..100, n)+0.25
+t4[`cstring]=rand("A"+string(1..100) join NULL, n)
+t4[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t4, WORK_DIR+"/t4.parquet", "snappy")
+assert 27, exists(WORK_DIR+"/t4.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t4.parquet")
+assert 28, scm.size()==t4.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t4.parquet")
+assert 29, re[`cbool]==t4[`cbool]
+assert 30, re[`cchar]==int(t4[`cchar])
+assert 31, re[`cshort]==t4[`cshort]
+assert 32, re[`cint]==t4[`cint]
+assert 33, re[`clong]==t4[`clong]
+assert 34, re[`cdate]==t4[`cdate]
+assert 35, re[`cmonth]==date(t4[`cmonth])
+assert 36, re[`ctime]==t4[`ctime]
+assert 37, re[`cminute]==time(t4[`cminute])
+assert 38, re[`csecond]==time(t4[`csecond])
+assert 39, re[`cdatetime]==timestamp(t4[`cdatetime])
+assert 40, re[`ctimestamp]==t4[`ctimestamp]
+assert 41, re[`cnanotime]==t4[`cnanotime]
+assert 42, re[`cnanotimestamp]==t4[`cnanotimestamp]
+assert 43, eqObj(re[`cfloat], t4[`cfloat])
+assert 44, eqObj(re[`cdouble], t4[`cdouble])
+assert 45, eqObj(re[`cstring], t4[`cstring])
+assert 46, eqObj(re[`csymbol], t4[`csymbol])
+
+//huge data
+n=500000
+t5 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t5[`cbool]=rand([true, false, NULL], n)
+t5[`cchar]=rand(char(97..106) join NULL, n)
+t5[`cshort]=rand(-100..100 join NULL, n)
+t5[`cint]=rand(-100..100 join NULL, n)
+t5[`clong]=rand(-100..100 join NULL, n)
+t5[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t5[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t5[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t5[`cminute]=rand(00:00m+0..9 join NULL, n)
+t5[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t5[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t5[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t5[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t5[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t5[`cfloat]=rand(-100..100, n)+0.25
+t5[`cdouble]=rand(-100..100, n)+0.25
+t5[`cstring]=rand("A"+string(1..100) join NULL, n)
+t5[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t5, WORK_DIR+"/t5.parquet", "snappy")
+assert 47, exists(WORK_DIR+"/t5.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+assert 48, scm.size()==t5.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t5.parquet")
+assert 49, re[`cbool]==t5[`cbool]
+assert 50, re[`cchar]==int(t5[`cchar])
+assert 51, re[`cshort]==t5[`cshort]
+assert 52, re[`cint]==t5[`cint]
+assert 53, re[`clong]==t5[`clong]
+assert 54, re[`cdate]==t5[`cdate]
+assert 55, re[`cmonth]==date(t5[`cmonth])
+assert 56, re[`ctime]==t5[`ctime]
+assert 57, re[`cminute]==time(t5[`cminute])
+assert 58, re[`csecond]==time(t5[`csecond])
+assert 59, re[`cdatetime]==timestamp(t5[`cdatetime])
+assert 60, re[`ctimestamp]==t5[`ctimestamp]
+assert 61, re[`cnanotime]==t5[`cnanotime]
+assert 62, re[`cnanotimestamp]==t5[`cnanotimestamp]
+assert 63, eqObj(re[`cfloat], t5[`cfloat])
+assert 64, eqObj(re[`cdouble], t5[`cdouble])
+assert 65, eqObj(re[`cstring], t5[`cstring])
+assert 66, eqObj(re[`csymbol], t5[`csymbol])
+
+
+@testing:case="test_parquet_saveParquet_compression_gzip"
+//empty table
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", "gzip")
+assert 1, exists(WORK_DIR+"/t1.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t1.parquet")
+assert 2, scm.size()==t1.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t1.parquet")
+assert 3, re.size()==0
+
+
+//all nulls
+t2 = table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+for(i in 1..100){
+	insert into t2 values(bool(), char(), short(), int(), long(), date(), month(), time(), minute(), second(), datetime(), timestamp(), nanotime(), nanotimestamp(), float(), double(), string(), string())
+}
+ParquetWin::saveParquet(t2, WORK_DIR+"/t2.parquet", "gzip")
+assert 4, exists(WORK_DIR+"/t2.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+assert 5, scm.size()==t2.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+for(col in re.colNames()){
+	assert 6, isNull(re[col])==true
+}
+
+//no nulls
+n=2000
+t3 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t3[`cbool]=take([true, false], n)
+t3[`cchar]=take(char(97..106), n)
+t3[`cshort]=1..2000
+t3[`cint]=1..2000
+t3[`clong]=1..2000
+t3[`cdate]=1960.01.01+0..1999
+t3[`cmonth]=1960.01M+0..1999
+t3[`ctime]=00:00:00.000+0..1999
+t3[`cminute]=take(00:00m+0..9, n)
+t3[`csecond]=00:00:00+0..1999
+t3[`cdatetime]=temporalAdd(1960.01.01T12:30:00, 0..1999, "d")
+t3[`ctimestamp]=temporalAdd(1960.01.01T12:30:00.008, 0..1999, "d")
+t3[`cnanotime]=temporalAdd(13:30:10.008007006, 0..1999, "s")
+t3[`cnanotimestamp]=temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s")
+t3[`cfloat]=1..2000+0.25
+t3[`cdouble]=1..2000+0.25
+t3[`cstring]="A"+string(1..n)
+t3[`csymbol]=take("BBB"+string(1..100), n)
+ParquetWin::saveParquet(t3, WORK_DIR+"/t3.parquet", "gzip")
+assert 7, exists(WORK_DIR+"/t3.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t3.parquet")
+assert 8, scm.size()==t3.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t3.parquet")
+assert 9, re[`cbool]==t3[`cbool]
+assert 10, re[`cchar]==int(t3[`cchar])
+assert 11, re[`cshort]==t3[`cshort]
+assert 12, re[`cint]==t3[`cint]
+assert 13, re[`clong]==t3[`clong]
+assert 14, re[`cdate]==t3[`cdate]
+assert 15, re[`cmonth]==date(t3[`cmonth])
+assert 16, re[`ctime]==t3[`ctime]
+assert 17, re[`cminute]==time(t3[`cminute])
+assert 18, re[`csecond]==time(t3[`csecond])
+assert 19, re[`cdatetime]==timestamp(t3[`cdatetime])
+assert 20, re[`ctimestamp]==t3[`ctimestamp]
+assert 21, re[`cnanotime]==t3[`cnanotime]
+assert 22, re[`cnanotimestamp]==t3[`cnanotimestamp]
+assert 23, eqObj(re[`cfloat], t3[`cfloat])
+assert 24, eqObj(re[`cdouble], t3[`cdouble])
+assert 25, eqObj(re[`cstring], t3[`cstring])
+assert 26, eqObj(re[`csymbol], t3[`csymbol])
+
+//some nulls
+n=2000
+t4 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t4[`cbool]=rand([true, false, NULL], n)
+t4[`cchar]=rand(char(97..106) join NULL, n)
+t4[`cshort]=rand(-100..100 join NULL, n)
+t4[`cint]=rand(-100..100 join NULL, n)
+t4[`clong]=rand(-100..100 join NULL, n)
+t4[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t4[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t4[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t4[`cminute]=rand(00:00m+0..9 join NULL, n)
+t4[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t4[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t4[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t4[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t4[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t4[`cfloat]=rand(-100..100, n)+0.25
+t4[`cdouble]=rand(-100..100, n)+0.25
+t4[`cstring]=rand("A"+string(1..100) join NULL, n)
+t4[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t4, WORK_DIR+"/t4.parquet", "gzip")
+assert 27, exists(WORK_DIR+"/t4.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t4.parquet")
+assert 28, scm.size()==t4.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t4.parquet")
+assert 29, re[`cbool]==t4[`cbool]
+assert 30, re[`cchar]==int(t4[`cchar])
+assert 31, re[`cshort]==t4[`cshort]
+assert 32, re[`cint]==t4[`cint]
+assert 33, re[`clong]==t4[`clong]
+assert 34, re[`cdate]==t4[`cdate]
+assert 35, re[`cmonth]==date(t4[`cmonth])
+assert 36, re[`ctime]==t4[`ctime]
+assert 37, re[`cminute]==time(t4[`cminute])
+assert 38, re[`csecond]==time(t4[`csecond])
+assert 39, re[`cdatetime]==timestamp(t4[`cdatetime])
+assert 40, re[`ctimestamp]==t4[`ctimestamp]
+assert 41, re[`cnanotime]==t4[`cnanotime]
+assert 42, re[`cnanotimestamp]==t4[`cnanotimestamp]
+assert 43, eqObj(re[`cfloat], t4[`cfloat])
+assert 44, eqObj(re[`cdouble], t4[`cdouble])
+assert 45, eqObj(re[`cstring], t4[`cstring])
+assert 46, eqObj(re[`csymbol], t4[`csymbol])
+
+//huge data
+n=5000000
+t5 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t5[`cbool]=rand([true, false, NULL], n)
+t5[`cchar]=rand(char(97..106) join NULL, n)
+t5[`cshort]=rand(-100..100 join NULL, n)
+t5[`cint]=rand(-100..100 join NULL, n)
+t5[`clong]=rand(-100..100 join NULL, n)
+t5[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t5[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t5[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t5[`cminute]=rand(00:00m+0..9 join NULL, n)
+t5[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t5[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t5[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t5[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t5[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t5[`cfloat]=rand(-100..100, n)+0.25
+t5[`cdouble]=rand(-100..100, n)+0.25
+t5[`cstring]=rand("A"+string(1..100) join NULL, n)
+t5[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t5, WORK_DIR+"/t5.parquet", "gzip")
+assert 47, exists(WORK_DIR+"/t5.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+assert 48, scm.size()==t5.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t5.parquet")
+assert 49, re[`cbool]==t5[`cbool]
+assert 50, re[`cchar]==int(t5[`cchar])
+assert 51, re[`cshort]==t5[`cshort]
+assert 52, re[`cint]==t5[`cint]
+assert 53, re[`clong]==t5[`clong]
+assert 54, re[`cdate]==t5[`cdate]
+assert 55, re[`cmonth]==date(t5[`cmonth])
+assert 56, re[`ctime]==t5[`ctime]
+assert 57, re[`cminute]==time(t5[`cminute])
+assert 58, re[`csecond]==time(t5[`csecond])
+assert 59, re[`cdatetime]==timestamp(t5[`cdatetime])
+assert 60, re[`ctimestamp]==t5[`ctimestamp]
+assert 61, re[`cnanotime]==t5[`cnanotime]
+assert 62, re[`cnanotimestamp]==t5[`cnanotimestamp]
+assert 63, eqObj(re[`cfloat], t5[`cfloat])
+assert 64, eqObj(re[`cdouble], t5[`cdouble])
+assert 65, eqObj(re[`cstring], t5[`cstring])
+assert 66, eqObj(re[`csymbol], t5[`csymbol])
+
+
+@testing:case="test_parquet_saveParquet_compression_zstd"
+//empty table
+t1=table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+ParquetWin::saveParquet(t1, WORK_DIR+"/t1.parquet", "zstd")
+assert 1, exists(WORK_DIR+"/t1.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t1.parquet")
+assert 2, scm.size()==t1.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t1.parquet")
+assert 3, re.size()==0
+
+
+//all nulls
+t2 = table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+for(i in 1..100){
+	insert into t2 values(bool(), char(), short(), int(), long(), date(), month(), time(), minute(), second(), datetime(), timestamp(), nanotime(), nanotimestamp(), float(), double(), string(), string())
+}
+ParquetWin::saveParquet(t2, WORK_DIR+"/t2.parquet", "zstd")
+assert 4, exists(WORK_DIR+"/t2.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t2.parquet")
+assert 5, scm.size()==t2.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t2.parquet")
+for(col in re.colNames()){
+	assert 6, isNull(re[col])==true
+}
+
+//no nulls
+n=2000
+t3 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t3[`cbool]=take([true, false], n)
+t3[`cchar]=take(char(97..106), n)
+t3[`cshort]=1..2000
+t3[`cint]=1..2000
+t3[`clong]=1..2000
+t3[`cdate]=1960.01.01+0..1999
+t3[`cmonth]=1960.01M+0..1999
+t3[`ctime]=00:00:00.000+0..1999
+t3[`cminute]=take(00:00m+0..9, n)
+t3[`csecond]=00:00:00+0..1999
+t3[`cdatetime]=temporalAdd(1960.01.01T12:30:00, 0..1999, "d")
+t3[`ctimestamp]=temporalAdd(1960.01.01T12:30:00.008, 0..1999, "d")
+t3[`cnanotime]=temporalAdd(13:30:10.008007006, 0..1999, "s")
+t3[`cnanotimestamp]=temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s")
+t3[`cfloat]=1..2000+0.25
+t3[`cdouble]=1..2000+0.25
+t3[`cstring]="A"+string(1..n)
+t3[`csymbol]=take("BBB"+string(1..100), n)
+ParquetWin::saveParquet(t3, WORK_DIR+"/t3.parquet", "zstd")
+assert 7, exists(WORK_DIR+"/t3.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t3.parquet")
+assert 8, scm.size()==t3.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t3.parquet")
+assert 9, re[`cbool]==t3[`cbool]
+assert 10, re[`cchar]==int(t3[`cchar])
+assert 11, re[`cshort]==t3[`cshort]
+assert 12, re[`cint]==t3[`cint]
+assert 13, re[`clong]==t3[`clong]
+assert 14, re[`cdate]==t3[`cdate]
+assert 15, re[`cmonth]==date(t3[`cmonth])
+assert 16, re[`ctime]==t3[`ctime]
+assert 17, re[`cminute]==time(t3[`cminute])
+assert 18, re[`csecond]==time(t3[`csecond])
+assert 19, re[`cdatetime]==timestamp(t3[`cdatetime])
+assert 20, re[`ctimestamp]==t3[`ctimestamp]
+assert 21, re[`cnanotime]==t3[`cnanotime]
+assert 22, re[`cnanotimestamp]==t3[`cnanotimestamp]
+assert 23, eqObj(re[`cfloat], t3[`cfloat])
+assert 24, eqObj(re[`cdouble], t3[`cdouble])
+assert 25, eqObj(re[`cstring], t3[`cstring])
+assert 26, eqObj(re[`csymbol], t3[`csymbol])
+
+//some nulls
+n=2000
+t4 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t4[`cbool]=rand([true, false, NULL], n)
+t4[`cchar]=rand(char(97..106) join NULL, n)
+t4[`cshort]=rand(-100..100 join NULL, n)
+t4[`cint]=rand(-100..100 join NULL, n)
+t4[`clong]=rand(-100..100 join NULL, n)
+t4[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t4[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t4[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t4[`cminute]=rand(00:00m+0..9 join NULL, n)
+t4[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t4[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t4[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t4[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t4[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t4[`cfloat]=rand(-100..100, n)+0.25
+t4[`cdouble]=rand(-100..100, n)+0.25
+t4[`cstring]=rand("A"+string(1..100) join NULL, n)
+t4[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t4, WORK_DIR+"/t4.parquet", "zstd")
+assert 27, exists(WORK_DIR+"/t4.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t4.parquet")
+assert 28, scm.size()==t4.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t4.parquet")
+assert 29, re[`cbool]==t4[`cbool]
+assert 30, re[`cchar]==int(t4[`cchar])
+assert 31, re[`cshort]==t4[`cshort]
+assert 32, re[`cint]==t4[`cint]
+assert 33, re[`clong]==t4[`clong]
+assert 34, re[`cdate]==t4[`cdate]
+assert 35, re[`cmonth]==date(t4[`cmonth])
+assert 36, re[`ctime]==t4[`ctime]
+assert 37, re[`cminute]==time(t4[`cminute])
+assert 38, re[`csecond]==time(t4[`csecond])
+assert 39, re[`cdatetime]==timestamp(t4[`cdatetime])
+assert 40, re[`ctimestamp]==t4[`ctimestamp]
+assert 41, re[`cnanotime]==t4[`cnanotime]
+assert 42, re[`cnanotimestamp]==t4[`cnanotimestamp]
+assert 43, eqObj(re[`cfloat], t4[`cfloat])
+assert 44, eqObj(re[`cdouble], t4[`cdouble])
+assert 45, eqObj(re[`cstring], t4[`cstring])
+assert 46, eqObj(re[`csymbol], t4[`csymbol])
+
+//huge data
+n=5000000
+t5 = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+t5[`cbool]=rand([true, false, NULL], n)
+t5[`cchar]=rand(char(97..106) join NULL, n)
+t5[`cshort]=rand(-100..100 join NULL, n)
+t5[`cint]=rand(-100..100 join NULL, n)
+t5[`clong]=rand(-100..100 join NULL, n)
+t5[`cdate]=rand(1960.01.01+0..100 join NULL, n)
+t5[`cmonth]=rand(1960.01M+0..100 join NULL, n)
+t5[`ctime]=rand(00:00:00.000+0..100 join NULL, n)
+t5[`cminute]=rand(00:00m+0..9 join NULL, n)
+t5[`csecond]=rand(00:00:00+0..100 join NULL, n)
+t5[`cdatetime]=rand(temporalAdd(1960.01.01T12:30:00, 0..100, "d") join NULL, n)
+t5[`ctimestamp]=rand(temporalAdd(1960.01.01T12:30:00.008, 0..100, "d") join NULL, n)
+t5[`cnanotime]=rand(temporalAdd(13:30:10.008007006, 0..100, "s") join NULL, n)
+t5[`cnanotimestamp]=rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..1999, "s") join NULL, n)
+t5[`cfloat]=rand(-100..100, n)+0.25
+t5[`cdouble]=rand(-100..100, n)+0.25
+t5[`cstring]=rand("A"+string(1..100) join NULL, n)
+t5[`csymbol]=rand("BBB"+string(1..100) join NULL, n)
+ParquetWin::saveParquet(t5, WORK_DIR+"/t5.parquet", "zstd")
+assert 47, exists(WORK_DIR+"/t5.parquet")==true
+scm=ParquetWin::extractParquetSchema(WORK_DIR+"/t5.parquet")
+assert 48, scm.size()==t5.colNames().size()
+re=ParquetWin::loadParquet(WORK_DIR+"/t5.parquet")
+assert 49, re[`cbool]==t5[`cbool]
+assert 50, re[`cchar]==int(t5[`cchar])
+assert 51, re[`cshort]==t5[`cshort]
+assert 52, re[`cint]==t5[`cint]
+assert 53, re[`clong]==t5[`clong]
+assert 54, re[`cdate]==t5[`cdate]
+assert 55, re[`cmonth]==date(t5[`cmonth])
+assert 56, re[`ctime]==t5[`ctime]
+assert 57, re[`cminute]==time(t5[`cminute])
+assert 58, re[`csecond]==time(t5[`csecond])
+assert 59, re[`cdatetime]==timestamp(t5[`cdatetime])
+assert 60, re[`ctimestamp]==t5[`ctimestamp]
+assert 61, re[`cnanotime]==t5[`cnanotime]
+assert 62, re[`cnanotimestamp]==t5[`cnanotimestamp]
+assert 63, eqObj(re[`cfloat], t5[`cfloat])
+assert 64, eqObj(re[`cdouble], t5[`cdouble])
+assert 65, eqObj(re[`cstring], t5[`cstring])
+assert 66, eqObj(re[`csymbol], t5[`csymbol])
+
+@testing:case="test_parquet_size_of_column_schema_not_match", exception=1
+schema = table(`open`high`low`close as name, `DOUBLE`DOUBLE`DOUBLE`DOUBLE as type)
+ans = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", schema)
+
+@testing:case="test_parquet_append_column_vec_to_table"//line 483?
+schema = table(`open`high`low`close`amount`volume`成交时间 as name, `DOUBLE`DOUBLE`DOUBLE`DOUBLE`DOUBLE`LONG`TIMESTAMP as type)
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", schema)
+update!(re,"addCol",1..size(re))
+assert 1, size(re.colNames()) == 8
+
+//===================hdfs 
+
+// @testing:case="test_Parquet_hdfs_prepare"
+// def clearDirectory(conn,DirectoryName){
+// 	try{
+// 		hdfs::delete(conn, DirectoryName,1)
+// 	}catch(ex){
+// 		print(ex)
+// 	}
+// 	try{
+// 		re = hdfs::exists(conn, DirectoryName)
+// 		throw "delete fail"
+// 	}catch(ex){
+// 		if(like(ex[1],"%"+"没有那个文件或目录"+"%")){
+// 			print("delete successful")
+// 		}else{
+// 			throw ex
+// 		}
+// 	}
+// }
+
+// //WRONG USE
+// @testing:case="test_parquet_hdfs_readFile_hdfsFS_int",exception=1 //line 66 ?? 如何配合测到loadParquetHdfs的入参
+// conn=hdfs::connect("192.168.0.125", 9000)
+// hdfs::createDirectory(conn, "/hdfs_test1")
+// re = hdfs::readFile(1,"/hdfs_test1/parquet_data.parquet",ParquetWin::loadParquetHdfs)
+
+// @testing:case="test_parquet_hdfs_readFile_hdfsFS_NULL",exception=1
+// re = hdfs::readFile(NULL,"/hdfs_test1/parquet_data.parquet",ParquetWin::loadParquetHdfs)
+
+// @testing:case="test_parquet_hdfs_readFile_path_int",exception=1
+// re = hdfs::readFile(conn,1,ParquetWin::loadParquetHdfs)
+
+// @testing:case="test_parquet_hdfs_readFile_path_NULL",exception=1
+// re = hdfs::readFile(conn,NULL,ParquetWin::loadParquetHdfs)
+
+// @testing:case="test_parquet_hdfs_readFile_path_not_exist",exception=1
+// re = hdfs::readFile(conn,"/hdfs_test1/parquet_data2.parquet",ParquetWin::loadParquetHdfs)
+
+// @testing:case="test_parquet_hdfs_readFile_path_directory",exception=1
+// re = hdfs::readFile(conn,"/hdfs_test1",ParquetWin::loadParquetHdfs)
+
+// @testing:case="test_parquet_saveParquetHdfs_NULL_Table",exception=1
+// hdfs::writeFile(conn, "/hdfs_test1/parquet_data.parquet", NULL, ParquetWin::saveParquetHdfs) // line 3467 ??
+
+// @testing:case="test_hdfs_writeFile_path_tb_vector",exception=1
+// re = hdfs::writeFile(conn,"/hdfs_test1/parquet_data.parquet",1..10,ParquetWin::saveParquetHdfs)// line 196??
+// hdfs::disconnect(conn)
+// conn = NULL
+
+// @testing:case="test_parquet_saveParquetHdfs_loadParquetHdfs_empty_table"
+// conn=hdfs::connect("192.168.0.125", 9000)
+// clearDirectory(conn,"/hdfs_test1")
+// hdfs::createDirectory(conn, "/hdfs_test1")
+// t = table(100:0, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol, [BOOL, CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+// hdfs::writeFile(conn,"/hdfs_test1/parquet_data.parquet",t,ParquetWin::saveParquetHdfs)
+// re = hdfs::readFile(conn,"/hdfs_test1/parquet_data.parquet",ParquetWin::loadParquetHdfs)
+// ParquetWin::saveParquet(t, WORK_DIR+"/parquet_data.parquet")
+// ex = ParquetWin::loadParquet(WORK_DIR+"/parquet_data.parquet")
+// assert 1,each(eqObj,re.values(),ex.values())
+// hdfs::disconnect(conn)
+// conn = NULL
+
+// @testing:case="test_parquet_saveParquetHdfs_loadParquetHdfs_all_datatype_no_null"
+// conn=hdfs::connect("192.168.0.125", 9000)
+// clearDirectory(conn,"/hdfs_test1")
+// hdfs::createDirectory(conn, "/hdfs_test1")
+// n = 2000
+// t = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol,[BOOL,CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+// t[`cbool] = rand([true, false], n)
+// t[`cchar] = rand(char(1..100), n)
+// t[`cshort] = rand(-100..100, n)
+// t[`cint] = rand(-100..100, n)
+// t[`clong] = rand(-100..100, n)
+// t[`cdate] = rand(1960.01.01+1..10000, n)
+// t[`cmonth] = rand(1960.01M+0..500, n)
+// t[`ctime] = rand(00:00:00.000+0..100, n)
+// t[`cminute] = rand(00:00m+0..9, n)
+// t[`csecond] = rand(00:00:00+0..100, n)
+// t[`cdatetime] = rand(temporalAdd(1960.01.01T12:30:00, 0..10000, "d"), n)
+// t[`ctimestamp] = rand(temporalAdd(1960.01.01T12:30:00.008, 0..10000, "d"), n)
+// t[`cnanotime] = rand(temporalAdd(13:30:10.008007006, 0..100, "s"), n)
+// t[`cnanotimestamp] = rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..10000, "d"), n)
+// t[`cfloat] = rand(-100..100, n)+0.25
+// t[`cdouble] = rand(-100..100, n)+0.25
+// t[`cstring] = rand("A"+string(1..100), n)
+// t[`csymbol] = rand("A"+string(1..100), n)
+// hdfs::writeFile(conn,"/hdfs_test1/parquet_data.parquet",t,ParquetWin::saveParquetHdfs)
+// re = hdfs::readFile(conn,"/hdfs_test1/parquet_data.parquet",ParquetWin::loadParquetHdfs)
+// ParquetWin::saveParquet(t, WORK_DIR+"/parquet_data.parquet")
+// ex = ParquetWin::loadParquet(WORK_DIR+"/parquet_data.parquet")
+// assert 1,each(eqObj,re.values(),ex.values())
+// hdfs::disconnect(conn)
+// conn = NULL
+
+// @testing:case="test_parquet_saveParquetHdfs_loadParquetHdfs_all_datatype_with_null"
+// conn=hdfs::connect("192.168.0.125", 9000)
+// clearDirectory(conn,"/hdfs_test1")
+// hdfs::createDirectory(conn, "/hdfs_test1")
+// n = 2000
+// t = table(n:n, `cbool`cchar`cshort`cint`clong`cdate`cmonth`ctime`cminute`csecond`cdatetime`ctimestamp`cnanotime`cnanotimestamp`cfloat`cdouble`cstring`csymbol,[BOOL,CHAR, SHORT, INT, LONG, DATE, MONTH, TIME, MINUTE, SECOND, DATETIME, TIMESTAMP, NANOTIME, NANOTIMESTAMP, FLOAT, DOUBLE, STRING, SYMBOL])
+// t[`cbool] = rand([true, false,NULL], n)
+// t[`cchar] = rand(char(1..100).join(take(char(),100)), n)
+// t[`cshort] = rand((-100..100).join(take(short(),100)), n)
+// t[`cint] = rand((-100..100).join(take(int(),100)), n)
+// t[`clong] = rand((-100..100).join(take(long(),100)), n)
+// t[`cdate] = rand((1960.01.01+1..10000).join(take(date(),100)), n)
+// t[`cmonth] = rand((1960.01M+0..500).join(take(month(),100)), n)
+// t[`ctime] = rand((00:00:00.000+0..100).join(take(time(),100)), n)
+// t[`cminute] = rand((00:00m+0..9).join(take(minute(),10)), n)
+// t[`csecond] = rand((00:00:00+0..100).join(take(second(),100)), n)
+// t[`cdatetime] = rand(temporalAdd(1960.01.01T12:30:00, 0..10000, "d").join(take(datetime(),1000)), n)
+// t[`ctimestamp] = rand(temporalAdd(1960.01.01T12:30:00.008, 0..10000, "d").join(take(timestamp(),1000)), n)
+// t[`cnanotime] = rand(temporalAdd(13:30:10.008007006, 0..100, "s").join(take(nanotime(),1000)), n)
+// t[`cnanotimestamp] = rand(temporalAdd(1960.01.01T13:30:10.008007006, 0..10000, "d").join(take(nanotimestamp(),1000)), n)
+// t[`cfloat] = rand((-100..100).join(take(float(),100)), n)+0.25
+// t[`cdouble] = rand((-100..100).join(take(double(),100)), n)+0.25
+// t[`cstring] = rand(("A"+string(1..100)).join(take(string(),100)), n)
+// t[`csymbol] = rand(("A"+string(1..100)).join(take(string(),100)), n)
+// hdfs::writeFile(conn,"/hdfs_test1/parquet_data.parquet",t,ParquetWin::saveParquetHdfs)
+// re = hdfs::readFile(conn,"/hdfs_test1/parquet_data.parquet",ParquetWin::loadParquetHdfs)
+// ParquetWin::saveParquet(t, WORK_DIR+"/parquet_data.parquet")
+// ex = ParquetWin::loadParquet(WORK_DIR+"/parquet_data.parquet")
+// assert 1,each(eqObj,re.values(),ex.values())
+// hdfs::disconnect(conn)
+// conn = NULL
+
+@testing:case="test_parquet_getLogLevel_default"
+assert 1, eqObj(ParquetWin::getLogLevel(), getConfig("logLevel"))
+
+@testing:case="test_function_parquet_setLogLevel_empty",exception=1
+ParquetWin::setLogLevel()
+
+@testing:case="test_function_parquet_setLogLevel_arg_over",syntaxError=1
+ParquetWin::setLogLevel(INFO, 2)
+
+@testing:case="test_function_parquet_setLogLevel_other_saclar_1",exception=1
+ParquetWin::setLogLevel(true)
+
+@testing:case="test_function_parquet_setLogLevel_other_saclar_2",exception=1
+ParquetWin::setLogLevel(DOUBLE)
+
+@testing:case="test_function_parquet_setLogLevel_vector",exception=1
+ParquetWin::setLogLevel([INFO, INFO])
+
+@testing:case="test_function_parquet_setLogLevel_pair",exception=1
+ParquetWin::setLogLevel(INFO:INFO)
+
+@testing:case="test_function_parquet_setLogLevel_matrix",exception=1
+ParquetWin::setLogLevel(1..6$2:3)
+
+@testing:case="test_function_parquet_setLogLevel_set",exception=1
+ParquetWin::setLogLevel(set(1 2 3))
+
+@testing:case="test_function_parquet_setLogLevel_dict",exception=1
+ParquetWin::setLogLevel(dict(1 2 3, 1 2 3))
+
+@testing:case="test_function_parquet_setLogLevel_table",exception=1
+ParquetWin::setLogLevel(table(1 2 3 as x))
+
+@testing:case="test_function_parquet_getLogLevel_arg_over",syntaxError=1
+ParquetWin::getLogLevel(1)
+
+@testing:case="test_function_parquet_getLogLevel_setLogLevel_multi_times"
+for(logLevel in take([DEBUG, INFO, WARNING, ERROR], 1000)){
+	ParquetWin::setLogLevel(logLevel)
+	ans = ParquetWin::getLogLevel()
+	if(logLevel==DEBUG){ex = "DEBUG"}
+	if(logLevel==INFO){ex = "INFO"}
+	if(logLevel==WARNING){ex = "WARNING"}
+	if(logLevel==ERROR){ex = "ERROR"}
+	assert 1, eqObj(ans, ex)
+}
+
+@testing:case="test_function_parquet_getLogLevel_setLogLevel_multi_jobs"
+def submitJob_set(){
+	for(logLevel in take([DEBUG, INFO, WARNING, ERROR], 1000)){
+		ParquetWin::setLogLevel(logLevel)
+	}
+}
+
+def submitJob_get(){
+	for(i in 1..1000){
+		ans = ParquetWin::getLogLevel()
+		assert 1, ans in ["DEBUG", "INFO", "WARNING", "ERROR"]
+	}
+}
+
+job1 = submitJob("submitJob_set", "submitJob_set", submitJob_set)
+job2 = submitJob("submitJob_set", "submitJob_set", submitJob_set)
+job3 = submitJob("submitJob_get", "submitJob_get", submitJob_get)
+job4 = submitJob("submitJob_get", "submitJob_get", submitJob_get)
+getJobReturn(job1, true)
+getJobReturn(job2, true)
+getJobReturn(job3, true)
+getJobReturn(job4, true)
+for(logLevel in take([DEBUG, INFO, WARNING, ERROR], 1000)){
+	ParquetWin::setLogLevel(logLevel)
+	ans = ParquetWin::getLogLevel()
+	if(logLevel==DEBUG){ex = "DEBUG"}
+	if(logLevel==INFO){ex = "INFO"}
+	if(logLevel==WARNING){ex = "WARNING"}
+	if(logLevel==ERROR){ex = "ERROR"}
+	assert 1, eqObj(ans, ex)
+}
+
+
+@testing:case="test_parquet_setLogLevel_keyword"
+assert 1, eqObj(syntax(ParquetWin::setLogLevel), "setLogLevel(logLevel)")
+ParquetWin::setLogLevel(logLevel=INFO)
+assert 2, eqObj(ParquetWin::getLogLevel(), "INFO")
+
+@testing:case="test_parquet_setLogLevel_keyword_error",syntaxError=1
+ParquetWin::setLogLevel(losdfevel=INFO)
+
+@testing:case="test_parquet_extractParquetSchema_keyword"
+assert 1, eqObj(syntax(ParquetWin::extractParquetSchema), 'extractParquetSchema(fileName)')
+re = ParquetWin::extractParquetSchema(fileName=DATA_DIR+"/spark.parquet")
+assert 2, re[`name]==`open`high`low`close`amount`volume`成交时间
+assert 3, re[`type]==`DOUBLE`DOUBLE`DOUBLE`DOUBLE`DOUBLE`LONG`TIMESTAMP
+
+@testing:case="test_parquet_extractParquetSchema_keyword_error",syntaxError=1
+ParquetWin::extractParquetSchema(sdgfr=DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_loadParquet_keyword"
+assert 1, eqObj(syntax(ParquetWin::loadParquet), "loadParquet(fileName,[schema],[columnsToLoad],[startRowGroup],[rowGroupNum])")
+scm = ParquetWin::extractParquetSchema(fileName=DATA_DIR+"/spark.parquet")
+update scm set type="DOUBLE" where name=`volume
+re = ParquetWin::loadParquet(fileName=DATA_DIR+"/spark.parquet")
+assert 2, re.size()==687480
+re = ParquetWin::loadParquet(DATA_DIR+"/spark.parquet", schema=scm)
+assert 3, re.size()==687480
+
+@testing:case="test_parquet_loadParquet_keyword_error",syntaxError=1
+ParquetWin::loadParquet(sdfsdf=DATA_DIR+"/spark.parquet")
+
+@testing:case="test_parquet_saveParquet_keyword"
+assert 1, eqObj(syntax(ParquetWin::saveParquet), "saveParquet(table, fileName, [compressMethod])")
+t = table(1..10 as x, 1..10 as y)
+ParquetWin::saveParquet(table=t, fileName=WORK_DIR+"/t1.parquet")
+re = ParquetWin::loadParquet(fileName=WORK_DIR+"/t1.parquet")
+assert 2, each(eqObj, re.values(), t.values())
+ParquetWin::saveParquet(t, WORK_DIR+"/t2.parquet", compressMethod="gzip")
+re = ParquetWin::loadParquet(fileName=WORK_DIR+"/t2.parquet")
+assert 3, each(eqObj, re.values(), t.values())
+
+@testing:case="test_parquet_saveParquet_keyword_error",syntaxError=1
+t = table(1..10 as x, 1..10 as y)
+ParquetWin::saveParquet(sdf=t, fileName=WORK_DIR+"/t1.parquet")
+
+@testing:case="test_parquet_loadParquetEx_keyword"
+assert 1, eqObj(syntax(ParquetWin::loadParquetEx), "loadParquetEx(dbHandle,tableName,partitionColumns,fileName,[schema],[columnsToLoad],[startRowGroup],[rowGroupNum],[transform])")
+t = table(1..10 as x, 1..10 as y)
+scm = ParquetWin::extractParquetSchema(fileName=WORK_DIR+"/t1.parquet")
+
+dbName="dfs://test_parquet"
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+db=database(dbName, VALUE, 1..10)
+pt=db.createPartitionedTable(t, `pt, `x)
+ParquetWin::loadParquetEx(dbHandle=db, tableName=`pt, partitionColumns=`x, fileName=WORK_DIR+"/t1.parquet")
+re = select * from pt 
+assert 2, each(eqObj, re.values(), t.values())
+
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+db=database(dbName, VALUE, 1..10)
+pt=db.createPartitionedTable(t, `pt, `x)
+ParquetWin::loadParquetEx(db, `pt, `x, WORK_DIR+"/t1.parquet",schema= scm)
+re = select * from pt 
+assert 3, each(eqObj, re.values(), t.values())
+
+@testing:case="test_parquet_loadParquetEx_keyword_error",syntaxError=1
+dbName="dfs://test_parquet"
+t = table(1..10 as x, 1..10 as y)
+if(existsDatabase(dbName)){
+	dropDatabase(dbName)
+}
+db=database(dbName, VALUE, 1..10)
+pt=db.createPartitionedTable(t, `pt, `x)
+ParquetWin::loadParquetEx(fsee=db, tableName=`pt, partitionColumns=`x, fileName=WORK_DIR+"/t1.parquet")
+
+@testing:case="test_parquet_parquetDS_keyword"
+assert 1, eqObj(syntax(ParquetWin::parquetDS), "parquetDS(fileName,[schema])")
+ans = ParquetWin::parquetDS(fileName=DATA_DIR+"/spark.parquet")
+assert 2, ans.size()>0
+scm = ParquetWin::extractParquetSchema(DATA_DIR+"/spark.parquet")
+ans = ParquetWin::parquetDS(DATA_DIR+"/spark.parquet", schema=scm)
+assert 3, ans.size()>0
+
+@testing:case="test_parquet_parquetDS_keyword_error",syntaxError=1
+ParquetWin::parquetDS(filsdfeName=DATA_DIR+"/spark.parquet")
+
+
+
